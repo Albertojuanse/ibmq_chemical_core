@@ -1,0 +1,3 @@
+qiskit
+qiskit_aqua
+qiskit_aqua_chemistry
