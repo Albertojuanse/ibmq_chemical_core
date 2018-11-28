@@ -2,6 +2,7 @@
 
 # Conexiones por arquitectura
 import interfazdeusuario
+import interfazsistema
 import interfazdemodulos
 import gestortrasero
 from gestordetareas import GestorDeTareas
@@ -20,3 +21,6 @@ while not credendialesCargadas:
     else:
         time.sleep(3)
     interfazdeusuario.mostrarcredenciales(credendialescargadas)
+
+# Lectura del los archivos de configuración del problema
+
