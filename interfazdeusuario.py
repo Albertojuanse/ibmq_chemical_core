@@ -2,6 +2,8 @@
 
 # Conexiones por arquitectura
 
+# Dependencias
+
 
 def __mostrarmensajeconsola(mensaje):
     """Esta función imprime en la consola de usuario un mensaje"""
@@ -18,3 +20,7 @@ def mostrarcredenciales(credendialescargadas):
         __mostrarmensajeconsola("Se ha establecido conexión con IBMQ")
     else:
         __mostrarmensajeconsola("Ha fallado la conexión con IBMQ\nSe reintentará en 3 segundos")
+
+def mostrarexcepcion(excepcion):
+    __mostrarmensajeconsola("[ERROR FATAL]: " + str(excepcion))
+
