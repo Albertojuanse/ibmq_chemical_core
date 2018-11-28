@@ -12,13 +12,11 @@ import time
 # ## Ejecución principal ##
 
 # Se cargan las credenciales, se establece la conexión con IBMQ y se cargan los listados de servidores
-interfazdeusuario.mostrarmensajeconsola("Bienvenido a ibmq_chemical_core")
-interfazdeusuario.mostrarmensajeconsola("Cargando servidores cuánticos disponibles...")
-
-credendialesCargadas = False
+interfazdeusuario.bienvenida()
+credendialescargadas = False
 while not credendialesCargadas:
     if gestortrasero.cargarservidores():
-        interfazdeusuario.mostrarmensajeconsola("Se ha establecido conexión con IBMQ")
+        credendialesCargadas = True
     else:
-        interfazdeusuario.mostrarmensajeconsola("Ha fallado la conexión con IBMQ\nSe reintentará en 3 segundos")
         time.sleep(3)
+    interfazdeusuario.mostrarcredenciales(credendialescargadas)
