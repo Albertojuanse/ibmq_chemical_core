@@ -28,7 +28,7 @@ def getservidoresreales():
     # Se precisa eliminar los simuladores de esta lista
     servidoresreales = []
     for servidor in __servidoresreales:
-        if type(servidor) == TIPO BACKEND REAL:
+        if type(servidor) == qiskit.backends.ibmq.ibmqbackend.IBMQBackend:
             servidoresreales.append(servidor)
     return servidoresreales
 
