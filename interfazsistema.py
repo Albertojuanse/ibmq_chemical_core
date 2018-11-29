@@ -4,23 +4,14 @@ import os
 import json
 
 
-def importararchivospropiedades():
+def __generarruta(carpeta, archivo):
     rutabase = str(os.path.dirname(os.path.abspath(__file__)))
-    if os.name == 'posix':
-        rutarelativa = "/propieties/problema.json"
-    elif os.name == 'nt':
-        rutarelativa = "\propieties\problema.json"
-    else:
-        raise OSError("No se reconoce este sistema operativo. No se puede importar las configuraciones")
-    ruta = rutabase + rutarelativa
-    problema = {}
-    if os.path.isfile(ruta):
-        with open(ruta, 'r') as archivo:
-            try:
-                problema = json.load(archivo)
-            except json.decoder.JSONDecodeError as e:
-                raise e
-        print(problema)
-    else:
-        raise FileNotFoundError("No existe el archivo {}".format(str(ruta)))
-    return problema
+    rutarelativa = os.path.join(carpeta, archivo)
+    return rutabase + rutarelativa
+
+
+def importarpropiedades(carpeta, archivo):
+    ruta = __generarruta(carpeta, archivo)
+    with open(ruta, "r") as archivo:
+        problema = json.load(archivo)
+    print(problema)
