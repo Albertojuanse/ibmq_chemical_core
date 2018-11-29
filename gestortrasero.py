@@ -7,6 +7,7 @@ import qiskit
 __servidoresreales = []
 __servidoressimuladores = []
 
+
 def __cargarcredenciales():
     """Esta función establece conexión con los servidores de IBMQ"""
     try:
@@ -14,6 +15,7 @@ def __cargarcredenciales():
         return True
     except:
         return False
+
 
 def cargarservidores():
     """Esta función carga los servidores disponibles"""
@@ -28,9 +30,10 @@ def getservidoresreales():
     # Se precisa eliminar los simuladores de esta lista
     servidoresreales = []
     for servidor in __servidoresreales:
-        if type(servidor) == qiskit.backends.ibmq.ibmqbackend.IBMQBackend:
+        if not servidor.configuration()["simulator"]:
             servidoresreales.append(servidor)
     return servidoresreales
+
 
 def getservidoressimuladores():
     """Esta función devuelve un listado con los servidores reales disponibles en linea"""

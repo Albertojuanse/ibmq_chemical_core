@@ -24,4 +24,4 @@ while not credendialescargadas:
     interfazdeusuario.mostrarcredenciales(credendialescargadas)
 
 # Lectura del los archivos de configuración del problema
-configuracionproblema = interfazsistema.importarpropiedades("propieties", "problema.json")
+configuraciondriver = interfazsistema.importarpropiedades("propieties", "problema.json")
