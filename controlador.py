@@ -40,3 +40,10 @@ cobyla = interfazdemodulos.configurarCOBYLA(configuracionaqua)
 HF = interfazdemodulos.configurarhartreefock(operadores["operadorqubit"], configuracionaqua, propiedadesmolecula)
 UCCSD = interfazdemodulos.configurarUCCSD(operadores["operadorqubit"], configuracionaqua, propiedadesmolecula, HF)
 VQE = interfazdemodulos.configurarVQE(operadores["operadorqubit"], UCCSD, cobyla)
+
+# Paso 4: Configurar la ejecucion
+results = VQE.run()
+print('The computed ground state energy is: {:.12f}'.format(results['eigvals'][0]))
+print('The total ground state energy is: {:.12f}'.format(results['eigvals'][0] + operadores["energy_shift"] +
+                                                         propiedadesmolecula["energia_de_repulsion_nuclear"]))
+print("Parameters: {}".format(results['opt_params']))
