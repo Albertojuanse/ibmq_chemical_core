@@ -25,12 +25,18 @@ while not credendialescargadas:
 
 # Lectura del los archivos de configuración del problema
 configuraciondriver = interfazsistema.importarpropiedades("properties", "molecula.json")
-#configuracionaqua = interfazsistema.importarpropiedades("properties", "problema.json")
+configuracionaqua = interfazsistema.importarpropiedades("properties", "problema.json")
 
 # Paso 1: cálculo de la molécula
 molecula = interfazdemodulos.procesarmolecula(configuraciondriver)
 
 # Paso 2: preparar el hamiltoniano
 propiedadesmolecula = interfazdemodulos.leerpropiedadesmolecula(molecula)
-operadores = interfazdemodulos.obteneroperadoreshamiltonianos(propiedadesmolecula)
+operadores = interfazdemodulos.obteneroperadoreshamiltonianos(propiedadesmolecula, configuracionaqua)
 interfazdemodulos.calcularenergiaclasico(propiedadesmolecula, operadores["operadorqubit"], operadores["energy_shift"])
+
+# Paso 3: Configurar problema y cargar de Aqua los algoritmos
+cobyla = interfazdemodulos.configurarCOBYLA(configuracionaqua)
+HF = interfazdemodulos.configurarhartreefock(operadores["operadorqubit"], configuracionaqua, propiedadesmolecula)
+UCCSD = interfazdemodulos.configurarUCCSD(operadores["operadorqubit"], configuracionaqua, propiedadesmolecula, HF)
+VQE = interfazdemodulos.configurarVQE(operadores["operadorqubit"], UCCSD, cobyla)
