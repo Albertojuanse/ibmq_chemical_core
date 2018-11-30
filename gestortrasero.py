@@ -38,3 +38,16 @@ def getservidoresreales():
 def getservidoressimuladores():
     """Esta función devuelve un listado con los servidores reales disponibles en linea"""
     return __servidoressimuladores
+
+
+def enviarcircuito():
+    pass
+
+def enviartarea():
+    pass
+
+def recibircircuito():
+    pass
+
+def recibirjob():
+    pass

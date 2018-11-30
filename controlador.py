@@ -24,4 +24,9 @@ while not credendialescargadas:
     interfazdeusuario.mostrarcredenciales(credendialescargadas)
 
 # Lectura del los archivos de configuración del problema
-configuraciondriver = interfazsistema.importarpropiedades("propieties", "problema.json")
+configuraciondriver = interfazsistema.importarpropiedades("properties", "molecula.json")
+#configuracionaqua = interfazsistema.importarpropiedades("properties", "problema.json")
+
+# Paso 1: cálculo de la molécula
+molecula = interfazdemodulos.procesarmolecula(configuraciondriver)
+print(molecula)
