@@ -8,21 +8,15 @@ __servidoresreales = []
 __servidoressimuladores = []
 
 
-def __cargarcredenciales():
-    """Esta función establece conexión con los servidores de IBMQ"""
+def cargarservidores():
+    """Esta función establece conexión con los servidores de IBMQ y los servidores disponibles"""
     try:
         qiskit.IBMQ.load_accounts()
+        __servidoresreales = qiskit.IBMQ.backends()
+        __servidoressimuladores = qiskit.Aer.backends()
         return True
     except:
         return False
-
-
-def cargarservidores():
-    """Esta función carga los servidores disponibles"""
-    __cargarcredenciales()
-
-    __servidoresreales = qiskit.IBMQ.backends()
-    __servidoressimuladores = qiskit.Aer.backends()
 
 
 def getservidoresreales():

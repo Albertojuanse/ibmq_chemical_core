@@ -24,3 +24,6 @@ def mostrarcredenciales(credendialescargadas):
 def mostrarexcepcion(excepcion):
     __mostrarmensajeconsola("[ERROR FATAL]: " + str(excepcion))
 
+
+def mostrarresultados():
+    pass

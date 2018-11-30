@@ -18,7 +18,7 @@ interfazdeusuario.bienvenida()
 credendialescargadas = False
 while not credendialescargadas:
     if gestortrasero.cargarservidores():
-        credendialesCargadas = True
+        credendialescargadas = True
     else:
         time.sleep(3)
     interfazdeusuario.mostrarcredenciales(credendialescargadas)
@@ -29,4 +29,8 @@ configuraciondriver = interfazsistema.importarpropiedades("properties", "molecul
 
 # Paso 1: cálculo de la molécula
 molecula = interfazdemodulos.procesarmolecula(configuraciondriver)
-print(molecula)
+
+# Paso 2: preparar el hamiltoniano
+propiedadesmolecula = interfazdemodulos.leerpropiedadesmolecula(molecula)
+operadores = interfazdemodulos.obteneroperadoreshamiltonianos(propiedadesmolecula)
+interfazdemodulos.calcularenergiaclasico(propiedadesmolecula, operadores["operadorqubit"], operadores["energy_shift"])
