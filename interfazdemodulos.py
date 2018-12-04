@@ -1,19 +1,32 @@
 """Esta clase servirá de enlace entre Quiskit, drivers... y el cliente"""
 
-# Dependencias comunes
-from collections import OrderedDict
-
 # Dependencias de aqua
 from qiskit_aqua_chemistry.drivers import ConfigurationManager
 from qiskit_aqua_chemistry import FermionicOperator
 from qiskit_aqua import (get_algorithm_instance, get_optimizer_instance,
                           get_variational_form_instance, get_initial_state_instance)
+# Dependencias de PySCF
+from pyscf import gto
+
+# Otras dependencias
+import dependencies.integrals
 
 
-def procesarmolecula(configuraciondriver):
+def __procesarmoleculapyscf(configuracionmolecula):
+    """Esta función construye una molécula usando el driver PySCF con los datos de entrada proporcionados"""
+    molecula = dependencies.integrals.compute_integrals(configuracionmolecula["configuracion"]["properties"])
+    return molecula
+
+
+def procesarmolecula(configuracionmolecula):
+    """Esta función analiza que tipo de procesado necesita una molécula para pedir su construcción"""
     gestorconfiguracion = ConfigurationManager()
-    driver = gestorconfiguracion.get_driver_instance(configuraciondriver["driver"])
-    return driver.run(configuraciondriver["configuracion"])
+    if configuracionmolecula["driver"] == "PYSCF":
+        molecula = __procesarmoleculapyscf(configuracionmolecula)
+    else:
+        driver = gestorconfiguracion.get_driver_instance(configuracionmolecula["driver"])
+        molecula = driver.run(configuracionmolecula["configuracion"])
+    return molecula
 
 
 def leerpropiedadesmolecula(molecula):

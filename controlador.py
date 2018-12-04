@@ -24,11 +24,11 @@ while not credendialescargadas:
     interfazdeusuario.mostrarcredenciales(credendialescargadas)
 
 # Lectura del los archivos de configuración del problema
-configuraciondriver = interfazsistema.importarpropiedades("properties", "molecula.json")
+configuracionmolecula = interfazsistema.importarpropiedades("properties", "molecula.json")
 configuracionaqua = interfazsistema.importarpropiedades("properties", "problema.json")
 
 # Paso 1: cálculo de la molécula
-molecula = interfazdemodulos.procesarmolecula(configuraciondriver)
+molecula = interfazdemodulos.procesarmolecula(configuracionmolecula)
 
 # Paso 2: preparar el hamiltoniano
 propiedadesmolecula = interfazdemodulos.leerpropiedadesmolecula(molecula)
