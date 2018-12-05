@@ -8,7 +8,7 @@ __servidoresreales = []
 __servidoressimuladores = []
 
 
-def cargarservidores():
+def cargar_servidores():
     """Esta función establece conexión con los servidores de IBMQ y los servidores disponibles"""
     try:
         qiskit.IBMQ.load_accounts()
@@ -19,7 +19,7 @@ def cargarservidores():
         return False
 
 
-def getservidoresreales():
+def get_servidores_reales():
     """Esta función devuelve un listado con los servidores reales disponibles en linea"""
     # Se precisa eliminar los simuladores de esta lista
     servidoresreales = []
@@ -29,19 +29,22 @@ def getservidoresreales():
     return servidoresreales
 
 
-def getservidoressimuladores():
+def get_servidores_simuladores():
     """Esta función devuelve un listado con los servidores reales disponibles en linea"""
     return __servidoressimuladores
 
 
-def enviarcircuito():
+def enviar_circuito():
     pass
 
-def enviartarea():
+
+def enviar_tarea():
     pass
 
-def recibircircuito():
+
+def recibir_circuito():
     pass
 
-def recibirjob():
+
+def recibir_tarea():
     pass

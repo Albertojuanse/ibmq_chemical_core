@@ -17,30 +17,32 @@ import json
 interfazdeusuario.bienvenida()
 credendialescargadas = False
 while not credendialescargadas:
-    if gestortrasero.cargarservidores():
+    if gestortrasero.cargar_servidores():
         credendialescargadas = True
     else:
         time.sleep(3)
-    interfazdeusuario.mostrarcredenciales(credendialescargadas)
+    interfazdeusuario.mostrar_credenciales(credendialescargadas)
 
 # Lectura del los archivos de configuración del problema
-configuracionmolecula = interfazsistema.importarpropiedades("properties", "molecula.json")
-configuracionaqua = interfazsistema.importarpropiedades("properties", "problema.json")
+configuracionmolecula = interfazdeusuario.preguntar_configuracion()
+if configuracionmolecula is None:
+    configuracionmolecula = interfazsistema.importar_propiedades("properties", "molecula.json")
+configuracionaqua = interfazsistema.importar_propiedades("properties", "problema.json")
 
 # Paso 1: cálculo de la molécula
-molecula = interfazdemodulos.procesarmolecula(configuracionmolecula)
+molecula = interfazdemodulos.procesar_molecula(configuracionmolecula)
 
 # Paso 2: preparar el hamiltoniano
-propiedadesmolecula = interfazdemodulos.leerpropiedadesmolecula(molecula)
-operadores = interfazdemodulos.obteneroperadoreshamiltonianos(propiedadesmolecula, configuracionaqua)
-interfazdemodulos.calcularenergiaclasico(propiedadesmolecula, operadores["operadorqubit"], operadores["energy_shift"])
+propiedadesmolecula = interfazdemodulos.leer_propiedades_molecula(molecula)
+operadores = interfazdemodulos.obtener_operadores_hamiltonianos(propiedadesmolecula, configuracionaqua)
+interfazdemodulos.calcular_energia_clasico(propiedadesmolecula, operadores["operadorqubit"], operadores["energy_shift"])
 
 # Paso 3: Configurar problema y cargar de Aqua los algoritmos
-cobyla = interfazdemodulos.configurarCOBYLA(configuracionaqua)
-HF = interfazdemodulos.configurarhartreefock(operadores["operadorqubit"], configuracionaqua, propiedadesmolecula)
-UCCSD = interfazdemodulos.configurarUCCSD(operadores["operadorqubit"], configuracionaqua, propiedadesmolecula, HF)
-VQE = interfazdemodulos.configurarVQE(operadores["operadorqubit"], UCCSD, cobyla)
+cobyla = interfazdemodulos.configurar_COBYLA(configuracionaqua)
+HF = interfazdemodulos.configurar_hartreefock(operadores["operadorqubit"], configuracionaqua, propiedadesmolecula)
+UCCSD = interfazdemodulos.configurar_UCCSD(operadores["operadorqubit"], configuracionaqua, propiedadesmolecula, HF)
+VQE = interfazdemodulos.configurar_VQE(operadores["operadorqubit"], UCCSD, cobyla)
 
 # Paso 4: Configurar la ejecucion
 resultados = VQE.run()
-interfazdeusuario.mostrarresultados(resultados, propiedadesmolecula, operadores)
+interfazdeusuario.mostrar_resultados(resultados, propiedadesmolecula, operadores)

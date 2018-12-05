@@ -12,24 +12,25 @@ from pyscf import gto
 import dependencies.integrals
 
 
-def __procesarmoleculapyscf(configuracionmolecula):
+def __procesar_molecula_pyscf(configuracionmolecula):
     """Esta función construye una molécula usando el driver PySCF con los datos de entrada proporcionados"""
     molecula = dependencies.integrals.compute_integrals(configuracionmolecula["configuracion"]["properties"])
     return molecula
 
 
-def procesarmolecula(configuracionmolecula):
+def procesar_molecula(configuracionmolecula):
     """Esta función analiza que tipo de procesado necesita una molécula para pedir su construcción"""
     gestorconfiguracion = ConfigurationManager()
     if configuracionmolecula["driver"] == "PYSCF":
-        molecula = __procesarmoleculapyscf(configuracionmolecula)
+        molecula = __procesar_molecula_pyscf(configuracionmolecula)
     else:
         driver = gestorconfiguracion.get_driver_instance(configuracionmolecula["driver"])
         molecula = driver.run(configuracionmolecula["configuracion"])
     return molecula
 
 
-def leerpropiedadesmolecula(molecula):
+def leer_propiedades_molecula(molecula):
+    """Esta función recupera las propiedades necesarias para los cálculos del objeto molécula"""
     propiedadesmolecula = {}
     propiedadesmolecula["h1"] = molecula._one_body_integrals
     propiedadesmolecula["h2"] = molecula._two_body_integrals
@@ -44,11 +45,13 @@ def leerpropiedadesmolecula(molecula):
     return propiedadesmolecula
 
 
-def __obteneroperadorfermionico(h1, h2):
+def __obtener_operador_fermionico(h1, h2):
+    """Esta función obtiene el operador fermiónico en función de las integrales de la molécula"""
     return FermionicOperator(h1=h1, h2=h2)
 
 
-def __reductordeorbitales(propiedadesmolecula, operadorfermionico):
+def __reductor_de_orbitales(propiedadesmolecula, operadorfermionico):
+    """Esta función elimina de la configuración electrónica de la molécula los orbitales que no se van a computar"""
     energy_shift = 0.0
     # please be aware that the idx here with respective to original idx
     freeze_list = [0]
@@ -77,26 +80,29 @@ def __reductordeorbitales(propiedadesmolecula, operadorfermionico):
     return operadorfermionico, energy_shift
 
 
-def __necesariareduccion(tipo_de_mapeo):
+def __necesaria_reduccion(tipo_de_mapeo):
+    """Esta función devuelve True si es preciso reducir el número de orbitales electrónicos"""
     return True if tipo_de_mapeo == "parity" else False
 
 
-def __obteneroperadorqbit(propiedadesmolecula, configuracionaqua, operadorfermionico):
+def __obtener_operador_qbit(propiedadesmolecula, configuracionaqua, operadorfermionico):
+    """Esta función permite mapear el hamiltoniano del problema a la evolución que habrá en el ordenador"""
     operadorqubit = operadorfermionico.mapping(map_type=configuracionaqua["general"]["tipo_de_mapeo"], threshold=0.00000001)
     operadorqubit = operadorqubit.two_qubit_reduced_operator(
-        propiedadesmolecula["numero_de_particulas"]) if __necesariareduccion(configuracionaqua["general"]["tipo_de_mapeo"]) else operadorqubit
+        propiedadesmolecula["numero_de_particulas"]) if __necesaria_reduccion(configuracionaqua["general"]["tipo_de_mapeo"]) else operadorqubit
     operadorqubit.chop(10**-10)
     return operadorqubit
 
 
-def obteneroperadoreshamiltonianos(propiedadesmolecula, configuracionaqua):
-    operadorfermionico = __obteneroperadorfermionico(propiedadesmolecula["h1"], propiedadesmolecula["h2"])
-    operadorfermionico, energy_shift = __reductordeorbitales(propiedadesmolecula, operadorfermionico)
-    operadorqubit = __obteneroperadorqbit(propiedadesmolecula, configuracionaqua, operadorfermionico)
+def obtener_operadores_hamiltonianos(propiedadesmolecula, configuracionaqua):
+    """Esta función construye el hamiltoniano de la evolución con el operador fermiónico"""
+    operadorfermionico = __obtener_operador_fermionico(propiedadesmolecula["h1"], propiedadesmolecula["h2"])
+    operadorfermionico, energy_shift = __reductor_de_orbitales(propiedadesmolecula, operadorfermionico)
+    operadorqubit = __obtener_operador_qbit(propiedadesmolecula, configuracionaqua, operadorfermionico)
     return {"operadorfermionico": operadorfermionico, "energy_shift": energy_shift, "operadorqubit": operadorqubit}
 
 
-def calcularenergiaclasico(propiedadesmolecula, operadorqubit, energy_shift):
+def calcular_energia_clasico(propiedadesmolecula, operadorqubit, energy_shift):
     """Esta función usa obtiene la energía de enlace menor mediante el cálculo del menor autovalor del sistema"""
     exact_eigensolver = get_algorithm_instance('ExactEigensolver')
     exact_eigensolver.init_args(operadorqubit, k=1)
@@ -106,23 +112,23 @@ def calcularenergiaclasico(propiedadesmolecula, operadorqubit, energy_shift):
                                                              propiedadesmolecula["energia_de_repulsion_nuclear"]))
 
 
-def configurarCOBYLA(configuracionaqua):
+def configurar_COBYLA(configuracionaqua):
     """Esta función obtiene una instancia del optimizador COBYLA configurada"""
     cobyla = get_optimizer_instance('COBYLA')
     cobyla.set_options(maxiter=configuracionaqua["COBYLA"]["max_eval"])
     return cobyla
 
 
-def configurarhartreefock(operadorqubit, configuracionaqua, propiedadesmolecula):
+def configurar_hartreefock(operadorqubit, configuracionaqua, propiedadesmolecula):
     """Esta función obtiene una instancia configurada del método de aproximación de la función de onda Hartree-Fock"""
     HF = get_initial_state_instance('HartreeFock')
     HF.init_args(operadorqubit.num_qubits, propiedadesmolecula["numero_de_orbitales_de_spin"],
-                 configuracionaqua["general"]["tipo_de_mapeo"], __necesariareduccion(configuracionaqua["general"]["tipo_de_mapeo"]),
+                 configuracionaqua["general"]["tipo_de_mapeo"], __necesaria_reduccion(configuracionaqua["general"]["tipo_de_mapeo"]),
                  propiedadesmolecula["numero_de_particulas"])
     return HF
 
 
-def configurarUCCSD(operadorqubit, configuracionaqua, propiedadesmolecula, HF):
+def configurar_UCCSD(operadorqubit, configuracionaqua, propiedadesmolecula, HF):
     """Esta función obtiene una instancia configurada del método numérico UCCSD"""
     UCCSD = get_variational_form_instance('UCCSD')
     UCCSD.init_args(operadorqubit.num_qubits, depth=configuracionaqua["UCCSD"]["profundidad"],
@@ -131,12 +137,12 @@ def configurarUCCSD(operadorqubit, configuracionaqua, propiedadesmolecula, HF):
                        active_occupied=configuracionaqua["UCCSD"]["orbitales_activos_ocupados"],
                        active_unoccupied=configuracionaqua["UCCSD"]["orbitales_activos_no_ocupados"],
                        initial_state=HF , qubit_mapping=configuracionaqua["general"]["tipo_de_mapeo"],
-                       two_qubit_reduction=__necesariareduccion(configuracionaqua["general"]["tipo_de_mapeo"]),
+                       two_qubit_reduction=__necesaria_reduccion(configuracionaqua["general"]["tipo_de_mapeo"]),
                        num_time_slices=configuracionaqua["UCCSD"]["numero_de_slices"])
     return UCCSD
 
 
-def configurarVQE(operadorqubit, UCCSD, cobyla):
+def configurar_VQE(operadorqubit, UCCSD, cobyla):
     """Esta función obtiene una instancia configurada del algoritmo VQE"""
     VQE = get_algorithm_instance('VQE')
     VQE.setup_quantum_backend(backend='statevector_simulator')

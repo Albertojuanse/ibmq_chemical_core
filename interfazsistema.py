@@ -5,20 +5,23 @@ import json
 from collections import OrderedDict
 
 
-def __generarruta(carpeta, archivo):
+def __generar_ruta(carpeta, archivo):
+    """Esta función devuelve la ruta en la cual está el archivo que se desea modificar"""
     rutabase = str(os.path.dirname(os.path.abspath(__file__)))
     rutarelativa = os.path.join(carpeta, archivo)
     return os.path.join(rutabase, rutarelativa)
 
 
-def importarpropiedades(carpeta, archivo):
-    ruta = __generarruta(carpeta, archivo)
+def importar_propiedades(carpeta, archivo):
+    """Esta función importa un JSON"""
+    ruta = __generar_ruta(carpeta, archivo)
     with open(ruta, "r") as archivo:
         propiedades = json.load(archivo)
     return propiedades
 
 
-def exportarpropiedades(carpeta, archivo, propiedades):
-    ruta = __generarruta(carpeta, archivo)
+def exportar_propiedades(carpeta, archivo, propiedades):
+    """Esta función exporta un JSON"""
+    ruta = __generar_ruta(carpeta, archivo)
     with open(ruta, "w") as archivo:
         json.dump(propiedades, archivo)
