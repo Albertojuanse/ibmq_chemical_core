@@ -25,5 +25,8 @@ def mostrarexcepcion(excepcion):
     __mostrarmensajeconsola("[ERROR FATAL]: " + str(excepcion))
 
 
-def mostrarresultados():
-    pass
+def mostrarresultados(resultados, propiedadesmolecula, operadores):
+    __mostrarmensajeconsola('The computed ground state energy is: {:.12f}'.format(resultados['eigvals'][0]))
+    __mostrarmensajeconsola('The total ground state energy is: {:.12f}'.format(resultados['eigvals'][0] +
+                                operadores["energy_shift"] + propiedadesmolecula["energia_de_repulsion_nuclear"]))
+    __mostrarmensajeconsola("Parameters: {}".format(resultados['opt_params']))
