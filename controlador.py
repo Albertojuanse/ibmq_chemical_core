@@ -8,6 +8,7 @@ import gestortrasero
 from gestordetareas import GestorDeTareas
 
 # Dependencias
+from eventos import Supervisor, Evento
 import time
 import json
 
@@ -16,12 +17,25 @@ import json
 # Se cargan las credenciales, se establece la conexión con IBMQ y se cargan los listados de servidores
 interfazdeusuario.bienvenida()
 credendialescargadas = False
+"""
 while not credendialescargadas:
     if gestortrasero.cargar_servidores():
         credendialescargadas = True
     else:
         time.sleep(3)
     interfazdeusuario.mostrar_credenciales(credendialescargadas)
+"""
+
+
+# Se despiertan a los supervisores necesarios
+class SupervisorDeResultados(Supervisor):
+    """Supervisor de resultados para el usuario"""
+
+    def en_evento(self, evento):
+        interfazdeusuario.mostrar_informe_supervisor(self, evento)
+
+
+supervisorderesultados = SupervisorDeResultados("supervisor de resultados", interfazdeusuario=interfazdeusuario)
 
 # Lectura del los archivos de configuración del problema
 configuracionmolecula = interfazdeusuario.preguntar_configuracion()
@@ -33,9 +47,12 @@ configuracionaqua = interfazsistema.importar_propiedades("properties", "problema
 molecula = interfazdemodulos.procesar_molecula(configuracionmolecula)
 
 # Paso 2: preparar el hamiltoniano
-propiedadesmolecula = interfazdemodulos.leer_propiedades_molecula(molecula)
+propiedadesmolecula = interfazdemodulos.leer_propiedades_molecula(molecula, supervisorderesultados)
 operadores = interfazdemodulos.obtener_operadores_hamiltonianos(propiedadesmolecula, configuracionaqua)
-interfazdemodulos.calcular_energia_clasico(propiedadesmolecula, operadores["operadorqubit"], operadores["energy_shift"])
+interfazdemodulos.calcular_energia_clasico(propiedadesmolecula,
+                                           operadores["operadorqubit"],
+                                           operadores["energy_shift"],
+                                           supervisorderesultados)
 
 # Paso 3: Configurar problema y cargar de Aqua los algoritmos
 cobyla = interfazdemodulos.configurar_COBYLA(configuracionaqua)

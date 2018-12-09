@@ -20,7 +20,6 @@ def __hacer_pregunta(mensaje):
             return False
 
 
-
 def __preguntar_opcion(mensaje, opciones):
     """Esta función pregunta al usuario para que elija una opción de una lista"""
     seleccion = "3"
@@ -110,3 +109,7 @@ def preguntar_terminar():
         elif respuesta == "n":
             __mostrar_mensaje_consola("Gracias por haber usado este programa")
             return True
+
+
+def mostrar_informe_supervisor(supervisor, evento):
+    __mostrar_mensaje_consola("[{}]: ".format(supervisor.nombre)+evento.contenido["mensaje"])

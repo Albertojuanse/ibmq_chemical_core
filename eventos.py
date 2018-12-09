@@ -4,59 +4,62 @@ import weakref
 
 class Supervisor:
     """Esta clase crea un supervisor para un determinado tipo de evento"""
-    def __init__(self, nombre):
+    def __init__(self, nombre, interfazdeusuario=None):
         self.nombre = nombre
+        if interfazdeusuario:
+            self.interfazdeusuario = interfazdeusuario
 
-    @classmethod
-    def en_evento(cls, evento):
+    def en_evento(self, evento, contenido):
         print("El supervisor {} ha capturado el evento {}".format(self.nombre, evento.nombre))
+        print("El contenido es {}".format(contenido))
 
 
 class Evento:
     """Esta clase define un evento o interrupción del programa"""
-    def __init__(self, nombre, supervisores = None):
+    def __init__(self, nombre, supervisores=None):
         self.nombre = nombre
         # Cada evento tiene asociado una lista de supervisores a los que anunciarse
         self.supervisores = []
+        self.contenido = {
+            "mensaje": "Este evento no tiene mensaje de contenido"
+        }
         if supervisores:
             self.registro(supervisores)
 
-    @classmethod
-    def registro(cls, supervisor):
-        """Este método añade supervisores al listado de reporte; el evento se anunciará a los supervisores registrados"""
-        #quitamos morralla (referencias inválidas) (mantengo comentario original)
-        cls.supervisores = [l for l in cls.supervisores if l() != None]
+    def registro(self, supervisor):
+        """Este método añade supervisores al listado de reporte; el evento se anunciará a los supervisores
+         registrados"""
+        # quitamos morralla (referencias inválidas) (mantengo comentario original)
+        self.supervisores = [l for l in self.supervisores if l() != None]
 
         # Si el parametro es un solo supervisor
-        if isinstance(supervisor,Supervisor):
-            cls.supervisores.append(weakref.ref(supervisor))
+        if isinstance(supervisor, Supervisor):
+            self.supervisores.append(weakref.ref(supervisor))
         # pero si es un listado de ellos
-        elif isinstance(supervisor, (list,tuple)):
+        elif isinstance(supervisor, (list, tuple)):
             for cadasupervisor in supervisor:
-                if isinstance(cadasupervisor,Supervisor):
-                    cls.supervisores.append(weakref.ref(supervisor))
+                if isinstance(cadasupervisor, Supervisor):
+                    self.supervisores.append(weakref.ref(supervisor))
 
-    @classmethod
-    def dar_de_baja(cls, supervisor):
+    def dar_de_baja(self, supervisor):
         """Este método elimina del registro de reporte a un supervisor concreto; el evento ya no se anunciará ante él"""
         # Si el parametro es un solo supervisor
         if isinstance(supervisor,Supervisor):
-            if supervisor in cls.supervisores:
-                cls.supervisores.remove(weakref.ref(supervisor))
+            if supervisor in self.supervisores:
+                self.supervisores.remove(weakref.ref(supervisor))
         # pero si es un listado de ellos
         elif isinstance(supervisor, (list,tuple)):
             for cadasupervisor in supervisor:
                 if isinstance(cadasupervisor,Supervisor):
-                    cls.supervisores.remove(weakref.ref(supervisor))
+                    self.supervisores.remove(weakref.ref(supervisor))
 
-    @classmethod
-    def dar_de_baja_todos(cls):
+    def dar_de_baja_todos(self):
         """Este método elimina del registro de reporte a los supervisores; el evento ya no se anunciará ante ninguno"""
-        cls.supervisores = []
+        self.supervisores = []
 
-    @classmethod
-    def anunciarse(cls):
-        for supervisor in cls.supervisores:
+    def anunciarse(self, contenido):
+        self.contenido = contenido
+        for supervisor in self.supervisores:
             ref = supervisor()  # weakref handle
             if ref:
-                ref.en_evento(cls)
+                ref.en_evento(self)

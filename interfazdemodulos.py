@@ -9,6 +9,7 @@ from qiskit_aqua import (get_algorithm_instance, get_optimizer_instance,
 from pyscf import gto
 
 # Otras dependencias
+from eventos import Evento
 import dependencies.integrals
 
 
@@ -29,7 +30,7 @@ def procesar_molecula(configuracionmolecula):
     return molecula
 
 
-def leer_propiedades_molecula(molecula):
+def leer_propiedades_molecula(molecula, supervisorderesultados):
     """Esta función recupera las propiedades necesarias para los cálculos del objeto molécula"""
     propiedadesmolecula = {}
     propiedadesmolecula["h1"] = molecula._one_body_integrals
@@ -39,9 +40,19 @@ def leer_propiedades_molecula(molecula):
     propiedadesmolecula["numero_de_orbitales"] = molecula._num_orbitals
     propiedadesmolecula["numero_de_orbitales_de_spin"] = molecula._num_orbitals * 2
     propiedadesmolecula["energia_HF"] = molecula._hf_energy
-    print("Energía con el método Hartree-Fock: {}".format(propiedadesmolecula["energia_HF"] - propiedadesmolecula["energia_de_repulsion_nuclear"]))
-    print("# de electrones: {}".format(propiedadesmolecula["numero_de_particulas"]))
-    print("# de orbitales de spin: {}".format(propiedadesmolecula["numero_de_orbitales_de_spin"]))
+    eventoderesultados = Evento("evento de resultados")
+    eventoderesultados.registro(supervisorderesultados)
+    eventoderesultados.anunciarse(
+        {"mensaje": "Energía con el método Hartree-Fock: {}".format(propiedadesmolecula["energia_HF"] -
+                                                                    propiedadesmolecula["energia_de_repulsion_nuclear"])
+         })
+    eventoderesultados.anunciarse(
+        {"mensaje": "# de electrones: {}".format(propiedadesmolecula["numero_de_particulas"])
+         })
+    eventoderesultados.anunciarse(
+        {"mensaje": "# de orbitales de spin: {}".format(propiedadesmolecula["numero_de_orbitales_de_spin"])
+         })
+    eventoderesultados.dar_de_baja_todos()
     return propiedadesmolecula
 
 
@@ -102,14 +113,18 @@ def obtener_operadores_hamiltonianos(propiedadesmolecula, configuracionaqua):
     return {"operadorfermionico": operadorfermionico, "energy_shift": energy_shift, "operadorqubit": operadorqubit}
 
 
-def calcular_energia_clasico(propiedadesmolecula, operadorqubit, energy_shift):
+def calcular_energia_clasico(propiedadesmolecula, operadorqubit, energy_shift, supervisorderesultados):
     """Esta función usa obtiene la energía de enlace menor mediante el cálculo del menor autovalor del sistema"""
     exact_eigensolver = get_algorithm_instance('ExactEigensolver')
     exact_eigensolver.init_args(operadorqubit, k=1)
     ret = exact_eigensolver.run()
-    print('The computed energy is: {:.12f}'.format(ret['eigvals'][0].real))
-    print('The total ground state energy is: {:.12f}'.format(ret['eigvals'][0].real + energy_shift +
-                                                             propiedadesmolecula["energia_de_repulsion_nuclear"]))
+
+    eventoderesultados = Evento("evento de resultados")
+    eventoderesultados.registro(supervisorderesultados)
+    eventoderesultados.anunciarse({"mensaje": "The computed energy is: {:.12f}".format(ret["eigvals"][0].real)})
+    eventoderesultados.anunciarse({"mensaje": "The total ground state energy is: {:.12f}".format(ret["eigvals"][0].real +
+                                                energy_shift + propiedadesmolecula["energia_de_repulsion_nuclear"])})
+    eventoderesultados.dar_de_baja_todos()
 
 
 def configurar_COBYLA(configuracionaqua):
