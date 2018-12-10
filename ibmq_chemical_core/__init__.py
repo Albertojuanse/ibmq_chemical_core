@@ -1,1 +1,1 @@
-from ibmq_chemical_core import controlador
+from ibmq_chemical_core import orquestador

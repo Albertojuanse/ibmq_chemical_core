@@ -10,6 +10,7 @@ def __mostrar_mensaje_consola(mensaje):
 
 
 def __hacer_pregunta(mensaje):
+    """Esta función auxiliar permite hacer preguntas al usuario"""
     __mostrar_mensaje_consola("\n"+mensaje)
     while True:
         respuesta = input("Select [s/n]: ")
@@ -36,6 +37,7 @@ def __preguntar_opcion(mensaje, opciones):
 
 
 def __preguntar_respuesta_abierta(mensaje):
+    """Esta función auxiliar hace preguntas al usuario"""
     return input("\n"+mensaje).lower()
 
 
@@ -51,7 +53,7 @@ def preguntar_configuracion():
     if respuesta == "Mediante el archivo JSON":
         return None
     elif respuesta == "Mediante línea de comandos":
-        propiedadesmolecula = {'driver': 'PYSCF',
+        configuracionmolecula = {'driver': 'PYSCF',
                                'configuracion': {
                                    'properties': {
                                        'atom': 'Li .0 .0 .0; H .0 .0 1.6',
@@ -62,18 +64,17 @@ def preguntar_configuracion():
                                     }
                                }
         # Validar con PySCF
-        propiedadesmolecula["configuracion"]["properties"]["atom"] =\
+        configuracionmolecula["configuracion"]["properties"]["atom"] =\
             __preguntar_respuesta_abierta("Introduce una estructura molecular válida:")
         haycarga = __hacer_pregunta("¿Tiene la molécula carga neta?")
-        print(haycarga)
         if haycarga:
-            propiedadesmolecula["configuracion"]["properties"]["charge"] =\
+            configuracionmolecula["configuracion"]["properties"]["charge"] =\
                 __preguntar_respuesta_abierta("Introduzca el valor de la carga neta")
         haycarga = __hacer_pregunta("¿Tiene la molécula spin neto?")
         if haycarga:
-            propiedadesmolecula["configuracion"]["properties"]["spin"] =\
+            configuracionmolecula["configuracion"]["properties"]["spin"] =\
                 __preguntar_respuesta_abierta("Introduzca el valor del spin neto")
-        return propiedadesmolecula
+        return configuracionmolecula
 
 
 def mostrar_credenciales(credendialescargadas):
@@ -111,4 +112,5 @@ def preguntar_terminar():
 
 
 def mostrar_informe_supervisor(supervisor, evento):
+    """Esta función muestra un mensaje de un supervisor por pantalla"""
     __mostrar_mensaje_consola("[{}]: ".format(supervisor.nombre)+evento.contenido["mensaje"])

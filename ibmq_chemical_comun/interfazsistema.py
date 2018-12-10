@@ -8,4 +8,4 @@ def importar_propiedades(carpeta, archivo):
 
 def exportar_propiedades(carpeta, archivo, propiedades):
     """Esta función exporta un JSON"""
-    return lectorjson.exportar_propiedades(carpeta, archivo)
+    return lectorjson.exportar_propiedades(carpeta, archivo, propiedades)
