@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+<form action="" method="post">
+    <p>Estructura atómica:</p>
+    <input type="text" name="estructura" value="Li 0 0 0; H 0 0 1"><br>
+    <p>Unidades:</p>
+    <input type="text" name="unidades" value="Amstrong"><br>
+    <p>Carga neta:</p>
+    <input type="text" name="carga" value=0><br>
+    <p>Espín neto:</p>
+    <input type="text" name="espin" value=0><br>
+    <p>Base:</p>
+    <input type="text" name="base" value="sto3g"><br>
+    <input type="submit" name="boton_calcular" value="Calcular"><br>
+</form>
+{% endblock %}

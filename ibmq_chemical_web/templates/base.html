@@ -1,0 +1,17 @@
+<html>
+    <head>
+        {% if title %}
+        <title> {{ title }} </title>
+        {% else %}
+        <title>IBMQ chemical</title>
+        {% endif %}
+    </head>
+    <body>
+        <nav>
+            Menu:
+            <a href="/">Calcular</a>
+        </nav>
+        {% block content %}
+        {% endblock %}
+    </body>
+</html>
