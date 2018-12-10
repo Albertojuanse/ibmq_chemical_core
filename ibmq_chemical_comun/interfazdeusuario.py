@@ -4,7 +4,6 @@
 
 # Dependencias
 
-
 def __mostrar_mensaje_consola(mensaje):
     """Esta función imprime en la consola de usuario un mensaje"""
     print(mensaje)
@@ -42,7 +41,7 @@ def __preguntar_respuesta_abierta(mensaje):
 
 def bienvenida():
     """Esta función muestra por pantalla un mensaje de bienvenida"""
-    __mostrar_mensaje_consola("Bienvenido a ibmq_chemical_core")
+    __mostrar_mensaje_consola("Bienvenido a ibmq_chemical")
     
     
 def preguntar_configuracion():

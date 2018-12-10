@@ -6,10 +6,9 @@ from qiskit_aqua_chemistry import FermionicOperator
 from qiskit_aqua import (get_algorithm_instance, get_optimizer_instance,
                           get_variational_form_instance, get_initial_state_instance)
 # Dependencias de PySCF
-from pyscf import gto
 
 # Otras dependencias
-from eventos import Evento
+from dependencies.eventos import Evento
 import dependencies.integrals
 
 

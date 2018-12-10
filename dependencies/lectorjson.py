@@ -1,13 +1,12 @@
-"""Esta clase implementa los métodos necesarios para interactuar con el sistema operativo"""
-
+"""Este modulo implementa los métodos necesarios para leer y escribir archivos JSON"""
 import os
 import json
-from collections import OrderedDict
 
 
 def __generar_ruta(carpeta, archivo):
     """Esta función devuelve la ruta en la cual está el archivo que se desea modificar"""
-    rutabase = str(os.path.dirname(os.path.abspath(__file__)))
+    rutabasedependencies = str(os.path.dirname(os.path.abspath(__file__)))
+    rutabase = os.path.abspath(os.path.join(rutabasedependencies, os.pardir))
     rutarelativa = os.path.join(carpeta, archivo)
     return os.path.join(rutabase, rutarelativa)
 
