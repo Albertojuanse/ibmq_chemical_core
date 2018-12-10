@@ -10,8 +10,10 @@ class Supervisor:
             self.interfazdeusuario = interfazdeusuario
 
     def en_evento(self, evento, contenido):
-        print("El supervisor {} ha capturado el evento {}".format(self.nombre, evento.nombre))
-        print("El contenido es {}".format(contenido))
+        if self.interfazdeusuario:
+            self.interfazdeusuario.mostrar_informe_supervisor(self, evento)
+        else:
+            print("[{}]: ".format(self.nombre)+evento.contenido["mensaje"])
 
 
 class Evento:

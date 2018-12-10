@@ -17,14 +17,13 @@ import json
 # Se cargan las credenciales, se establece la conexión con IBMQ y se cargan los listados de servidores
 interfazdeusuario.bienvenida()
 credendialescargadas = False
-"""
+
 while not credendialescargadas:
     if gestortrasero.cargar_servidores():
         credendialescargadas = True
     else:
         time.sleep(3)
     interfazdeusuario.mostrar_credenciales(credendialescargadas)
-"""
 
 
 # Se despiertan a los supervisores necesarios
