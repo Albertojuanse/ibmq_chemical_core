@@ -14,6 +14,7 @@ def ejecutar(mododeejecucion, configuracionmolecula=None):
 
     # Se cargan las credenciales, se establece la conexión con IBMQ y se cargan los listados de servidores
     interfazdeusuario.bienvenida()
+    """
     credendialescargadas = False
     while not credendialescargadas:
         if gestortrasero.cargar_servidores():
@@ -21,7 +22,7 @@ def ejecutar(mododeejecucion, configuracionmolecula=None):
         else:
             time.sleep(3)
         interfazdeusuario.mostrar_credenciales(credendialescargadas)
-
+    """
     # Se despiertan a los supervisores necesarios
     class SupervisorDeResultados(Supervisor):
         """Supervisor de resultados para el usuario"""
@@ -30,6 +31,7 @@ def ejecutar(mododeejecucion, configuracionmolecula=None):
             """Comportamiento del supervisor ante un evento"""
             interfazdeusuario.mostrar_informe_supervisor(self, evento)
     supervisorderesultados = SupervisorDeResultados("supervisor de resultados", interfazdeusuario=interfazdeusuario)
+    supervisorderesultados.start()
 
     # Se elije el modo de ejecución ["linea de comandos", "interfaz grafica" o "aplicacion web"]
     if mododeejecucion == "linea de comandos":

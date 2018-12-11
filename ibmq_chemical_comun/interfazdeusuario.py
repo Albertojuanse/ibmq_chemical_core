@@ -4,6 +4,7 @@
 
 # Dependencias
 
+
 def __mostrar_mensaje_consola(mensaje):
     """Esta función imprime en la consola de usuario un mensaje"""
     print(mensaje)
@@ -113,4 +114,4 @@ def preguntar_terminar():
 
 def mostrar_informe_supervisor(supervisor, evento):
     """Esta función muestra un mensaje de un supervisor por pantalla"""
-    __mostrar_mensaje_consola("[{}]: ".format(supervisor.nombre)+evento.contenido["mensaje"])
+    __mostrar_mensaje_consola("[{}]: ".format(supervisor.nombre)+evento.getcontenido()["mensaje"])

@@ -1,19 +1,48 @@
 # https://mail.python.org/pipermail/python-es/2004-March/004155.html
 import weakref
+import time
+from threading import Thread, Lock
 
 
-class Supervisor:
+class Supervisor(Thread):
     """Esta clase crea un supervisor para un determinado tipo de evento"""
+
     def __init__(self, nombre, interfazdeusuario=None):
+        Thread.__init__(self)
         self.nombre = nombre
+        self.evento_reportado = False
+        self.eventos = []
+        self.contenidoevento = {}
+        self.cerrojo = Lock()
         if interfazdeusuario:
             self.interfazdeusuario = interfazdeusuario
 
-    def en_evento(self, evento, contenido):
+    def run(self):
+        """Esta función se ejecuta mientras el supervisor esté vivo"""
+        while True:
+            if self.evento_reportado:
+                try:
+                    self.cerrojo.acquire()
+                    for evento in self.eventos:
+                        self.en_evento(evento)
+                        self.eventos.remove(evento)
+                    self.evento_reportado = False
+                finally:
+                    self.cerrojo.release()
+            time.sleep(1)
+
+    def reportar_evento(self, evento):
+        """Esta función permite a un evento reportarse"""
+        self.eventos.append(evento)
+        self.evento_reportado = True
+
+    def en_evento(self, evento):
+        """Esta función define el comportamiento del supervisor ante un evento"""
+        contenido = evento.getcontenido()
         if self.interfazdeusuario:
             self.interfazdeusuario.mostrar_informe_supervisor(self, evento)
         else:
-            print("[{}]: ".format(self.nombre)+evento.contenido["mensaje"])
+            print("[{}]: ".format(self.nombre) + contenido["mensaje"])
 
 
 class Evento:
@@ -60,8 +89,13 @@ class Evento:
         self.supervisores = []
 
     def anunciarse(self, contenido):
+        """Con esta función se reporta a sus supervisores"""
         self.contenido = contenido
         for supervisor in self.supervisores:
             ref = supervisor()  # weakref handle
             if ref:
-                ref.en_evento(self)
+                ref.reportar_evento(self)
+
+    def getcontenido(self):
+        """Devuelve el contenido del evento"""
+        return self.contenido
