@@ -23,12 +23,12 @@ def ejecutar(mododeejecucion, configuracionmolecula=None):
         interfazdeusuario.mostrar_credenciales(credendialescargadas)
     """
 
-    # Se despiertan a los supervisores necesarios
-    supervisorderesultados = SupervisorDeResultados("supervisor de resultados", interfazdeusuario=interfazdeusuario)
-
     # Se elije el modo de ejecución ["linea de comandos", "interfaz grafica" o "aplicacion web"]
     if mododeejecucion == "linea de comandos":
         # MODO LÍNEA DE COMANDOS
+
+        # Se despiertan a los supervisores necesarios
+        supervisorderesultados = SupervisorDeResultados("supervisor de resultados", interfazdeusuario=interfazdeusuario)
 
         # Lectura del los archivos de configuración del problema
         configuracionmolecula = interfazdeusuario.preguntar_configuracion()
@@ -57,6 +57,10 @@ def ejecutar(mododeejecucion, configuracionmolecula=None):
         resultados = VQE.run()
         interfazdeusuario.mostrar_resultados(resultados, propiedadesmolecula, operadores)
     elif mododeejecucion == "aplicacion web":
+
+        # Se despiertan a los supervisores necesarios
+        supervisorderesultados = SupervisorDeResultados("supervisor de resultados", interfazdeusuario=interfazdeusuario)
+
         # Lectura del los archivos de configuración del problema
         configuracionaqua = interfazsistema.importar_propiedades("properties", "problema.json")
 
@@ -80,3 +84,6 @@ def ejecutar(mododeejecucion, configuracionmolecula=None):
         # Paso 4: Configurar la ejecucion
         resultados = VQE.run()
         interfazdeusuario.mostrar_resultados(resultados, propiedadesmolecula, operadores)
+
+    elif mododeejecucion == "api":
+        pass

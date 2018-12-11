@@ -146,13 +146,13 @@ def configurar_UCCSD(operadorqubit, configuracionaqua, propiedadesmolecula, HF):
     """Esta función obtiene una instancia configurada del método numérico UCCSD"""
     UCCSD = get_variational_form_instance('UCCSD')
     UCCSD.init_args(operadorqubit.num_qubits, depth=configuracionaqua["UCCSD"]["profundidad"],
-                       num_orbitals=propiedadesmolecula["numero_de_orbitales"],
-                       num_particles=propiedadesmolecula["numero_de_particulas"],
-                       active_occupied=configuracionaqua["UCCSD"]["orbitales_activos_ocupados"],
-                       active_unoccupied=configuracionaqua["UCCSD"]["orbitales_activos_no_ocupados"],
-                       initial_state=HF , qubit_mapping=configuracionaqua["general"]["tipo_de_mapeo"],
-                       two_qubit_reduction=__necesaria_reduccion(configuracionaqua["general"]["tipo_de_mapeo"]),
-                       num_time_slices=configuracionaqua["UCCSD"]["numero_de_slices"])
+                    num_orbitals=propiedadesmolecula["numero_de_orbitales"],
+                    num_particles=propiedadesmolecula["numero_de_particulas"],
+                    active_occupied=configuracionaqua["UCCSD"]["orbitales_activos_ocupados"],
+                    active_unoccupied=configuracionaqua["UCCSD"]["orbitales_activos_no_ocupados"],
+                    initial_state=HF , qubit_mapping=configuracionaqua["general"]["tipo_de_mapeo"],
+                    two_qubit_reduction=__necesaria_reduccion(configuracionaqua["general"]["tipo_de_mapeo"]),
+                    num_time_slices=configuracionaqua["UCCSD"]["numero_de_slices"])
     return UCCSD
 
 
