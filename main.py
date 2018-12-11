@@ -12,3 +12,6 @@ if __name__ == "__main__":
         from ibmq_chemical_web import aplicacion
 
         aplicacion.run()
+
+    elif mododeejecucion == "api":
+        import ibmq_chemical_api
