@@ -1,5 +1,8 @@
 """Esta clase servirá de enlace entre Quiskit, drivers... y el cliente"""
 
+# Conexiones por arquitectura
+from ibmq_chemical_core import orquestador
+
 # Dependencias de aqua
 from qiskit_aqua_chemistry.drivers import ConfigurationManager
 from qiskit_aqua_chemistry import FermionicOperator

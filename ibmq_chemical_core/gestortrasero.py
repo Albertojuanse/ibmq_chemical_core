@@ -1,5 +1,9 @@
 """Esta clase crea un gestor de las conexiones con las máquinas cuánticas de IBM y los simuladores de Quiskit"""
 
+# Conexiones por arquitectura
+from ibmq_chemical_core import orquestador
+from ibmq_chemical_core.gestordetareas import GestorDeTareas
+
 # importa módulos
 import qiskit
 

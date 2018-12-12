@@ -3,6 +3,7 @@
 # Conexiones por arquitectura
 from ibmq_chemical_comun import interfazdeusuario, interfazsistema
 from ibmq_chemical_core import gestortrasero, interfazdemodulos
+from ibmq_chemical_core.gestordetareas import GestorDeTareas
 
 # Dependencias
 from dependencies.eventos import SupervisorDeResultados
