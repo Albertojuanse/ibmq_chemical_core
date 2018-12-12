@@ -1,0 +1,11 @@
+{# http://jinja.pocoo.org/docs/2.10/templates/ #}
+{% extends "base.html" %}
+
+{% block ejecutado %}
+        <p>El programa se ha ejecutado con la siguiente salida de consola:</p><br>
+{% endblock %}
+{% block consola %}
+    {% for linea in lineas %}
+        <p>{{ linea }}</p>
+    {% endfor %}
+{% endblock %}

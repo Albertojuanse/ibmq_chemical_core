@@ -1,0 +1,2 @@
+# Variables globales
+mododeejecucion = None

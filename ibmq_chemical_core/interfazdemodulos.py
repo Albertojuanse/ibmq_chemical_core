@@ -29,7 +29,7 @@ def procesar_molecula(configuracionmolecula):
     return molecula
 
 
-def leer_propiedades_molecula(molecula, supervisorderesultados):
+def leer_propiedades_molecula(molecula, supervisorderesultados=None):
     """Esta función recupera las propiedades necesarias para los cálculos del objeto molécula"""
     propiedadesmolecula = {}
     propiedadesmolecula["h1"] = molecula._one_body_integrals
@@ -39,19 +39,21 @@ def leer_propiedades_molecula(molecula, supervisorderesultados):
     propiedadesmolecula["numero_de_orbitales"] = molecula._num_orbitals
     propiedadesmolecula["numero_de_orbitales_de_spin"] = molecula._num_orbitals * 2
     propiedadesmolecula["energia_HF"] = molecula._hf_energy
-    eventoderesultados = Evento("evento de resultados")
-    eventoderesultados.registro(supervisorderesultados)
-    eventoderesultados.anunciarse(
-        {"mensaje": "Energía con el método Hartree-Fock: {}".format(propiedadesmolecula["energia_HF"] -
-                                                                    propiedadesmolecula["energia_de_repulsion_nuclear"])
-         })
-    eventoderesultados.anunciarse(
-        {"mensaje": "# de electrones: {}".format(propiedadesmolecula["numero_de_particulas"])
-         })
-    eventoderesultados.anunciarse(
-        {"mensaje": "# de orbitales de spin: {}".format(propiedadesmolecula["numero_de_orbitales_de_spin"])
-         })
-    eventoderesultados.dar_de_baja_todos()
+    # Solo se remiten los resultados si se precisan dado el modo de ejecución
+    if supervisorderesultados:
+        eventoderesultados = Evento("evento de resultados")
+        eventoderesultados.registro(supervisorderesultados)
+        eventoderesultados.anunciarse(
+            {"mensaje": "Energía con el método Hartree-Fock: {}".format(propiedadesmolecula["energia_HF"] -
+                                                                        propiedadesmolecula["energia_de_repulsion_nuclear"])
+             })
+        eventoderesultados.anunciarse(
+            {"mensaje": "# de electrones: {}".format(propiedadesmolecula["numero_de_particulas"])
+             })
+        eventoderesultados.anunciarse(
+            {"mensaje": "# de orbitales de spin: {}".format(propiedadesmolecula["numero_de_orbitales_de_spin"])
+             })
+        eventoderesultados.dar_de_baja_todos()
     return propiedadesmolecula
 
 
@@ -112,18 +114,19 @@ def obtener_operadores_hamiltonianos(propiedadesmolecula, configuracionaqua):
     return {"operadorfermionico": operadorfermionico, "energy_shift": energy_shift, "operadorqubit": operadorqubit}
 
 
-def calcular_energia_clasico(propiedadesmolecula, operadorqubit, energy_shift, supervisorderesultados):
+def calcular_energia_clasico(propiedadesmolecula, operadorqubit, energy_shift, supervisorderesultados=None):
     """Esta función usa obtiene la energía de enlace menor mediante el cálculo del menor autovalor del sistema"""
     exact_eigensolver = get_algorithm_instance('ExactEigensolver')
     exact_eigensolver.init_args(operadorqubit, k=1)
     ret = exact_eigensolver.run()
 
-    eventoderesultados = Evento("evento de resultados")
-    eventoderesultados.registro(supervisorderesultados)
-    eventoderesultados.anunciarse({"mensaje": "The computed energy is: {:.12f}".format(ret["eigvals"][0].real)})
-    eventoderesultados.anunciarse({"mensaje": "The total ground state energy is: {:.12f}".format(ret["eigvals"][0].real +
-                                                energy_shift + propiedadesmolecula["energia_de_repulsion_nuclear"])})
-    eventoderesultados.dar_de_baja_todos()
+    if supervisorderesultados:
+        eventoderesultados = Evento("evento de resultados")
+        eventoderesultados.registro(supervisorderesultados)
+        eventoderesultados.anunciarse({"mensaje": "The computed energy is: {:.12f}".format(ret["eigvals"][0].real)})
+        eventoderesultados.anunciarse({"mensaje": "The total ground state energy is: {:.12f}".format(ret["eigvals"][0].real +
+                                                    energy_shift + propiedadesmolecula["energia_de_repulsion_nuclear"])})
+        eventoderesultados.dar_de_baja_todos()
 
 
 def configurar_COBYLA(configuracionaqua):

@@ -1,13 +1,24 @@
 """Esta clase implementa una interfaz de usuario y sus acciones"""
 
 # Conexiones por arquitectura
+# una es la consola del propio intérprete de ejecución
+from ibmq_chemical_web import modelo
+from ibmq_chemical_api import api
 
-# Dependencias
+# Variables globales
+import config
 
 
 def __mostrar_mensaje_consola(mensaje):
     """Esta función imprime en la consola de usuario un mensaje"""
-    print(mensaje)
+    if config.mododeejecucion == "linea de comandos":
+        print(mensaje)
+
+    elif config.mododeejecucion == "aplicacion web":
+        modelo.mostrar_mensaje_consola(mensaje)
+
+    elif config.mododeejecucion == "api":
+        api.mostrar_mensaje_consola(mensaje)
 
 
 def __hacer_pregunta(mensaje):

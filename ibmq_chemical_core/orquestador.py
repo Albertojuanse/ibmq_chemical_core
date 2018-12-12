@@ -7,8 +7,11 @@ from ibmq_chemical_core import gestortrasero, interfazdemodulos
 # Dependencias
 from dependencies.eventos import SupervisorDeResultados
 
+# Variables globales
+import config
 
-def ejecutar(mododeejecucion, configuracionmolecula=None):
+
+def ejecutar(configuracionmolecula=None):
     """Lanza la ejecución principal del programa"""
 
     # Se cargan las credenciales, se establece la conexión con IBMQ y se cargan los listados de servidores
@@ -24,7 +27,7 @@ def ejecutar(mododeejecucion, configuracionmolecula=None):
     """
 
     # Se elije el modo de ejecución ["linea de comandos", "interfaz grafica" o "aplicacion web"]
-    if mododeejecucion == "linea de comandos":
+    if config.mododeejecucion == "linea de comandos":
         # MODO LÍNEA DE COMANDOS
 
         # Se despiertan a los supervisores necesarios
@@ -56,7 +59,7 @@ def ejecutar(mododeejecucion, configuracionmolecula=None):
         # Paso 4: Configurar la ejecucion
         resultados = VQE.run()
         interfazdeusuario.mostrar_resultados(resultados, propiedadesmolecula, operadores)
-    elif mododeejecucion == "aplicacion web":
+    elif config.mododeejecucion == "aplicacion web":
 
         # Se despiertan a los supervisores necesarios
         supervisorderesultados = SupervisorDeResultados("supervisor de resultados", interfazdeusuario=interfazdeusuario)
@@ -85,5 +88,5 @@ def ejecutar(mododeejecucion, configuracionmolecula=None):
         resultados = VQE.run()
         interfazdeusuario.mostrar_resultados(resultados, propiedadesmolecula, operadores)
 
-    elif mododeejecucion == "api":
+    elif config.mododeejecucion == "api":
         pass
