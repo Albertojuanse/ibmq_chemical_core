@@ -1,3 +1,4 @@
+"""Esta librería se ha importado de Qiskit Aqua y permite hacer ciertos cálculos físicos"""
 # -*- coding: utf-8 -*-
 
 # Copyright 2018 IBM.
