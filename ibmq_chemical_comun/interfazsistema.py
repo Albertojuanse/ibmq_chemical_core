@@ -59,6 +59,11 @@ def generar_propieties_por_defecto():
     exportar_propiedades("properties", "resultados.json", resultados)
 
 
+def importar_imagenes(nombres_iconos):
+    """Esta función devuelve un listado de las rutas completas de los recursos que se le indique"""
+    return nombres_iconos
+
+
 def generar_nombre():
     """Esta función genera nombre para los archivos usando para ello la hora y fecha actual del sistema"""
     nombre = str(time.localtime().tm_year) +\
