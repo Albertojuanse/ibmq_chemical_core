@@ -3,91 +3,132 @@
 # Conexiones por arquitectura
 from ibmq_chemical_comun import interfazdeusuario, interfazsistema
 from ibmq_chemical_core import gestortrasero, interfazdemodulos
-from ibmq_chemical_core.gestordetareas import GestorDeTareas
 
 # Dependencias
-from dependencies.eventos import SupervisorDeResultados
-
-# Variables globales
-import config
+import time
+from dependencies.eventos import SupervisorDeResultados,  SupervisorDeResultadosParaAPI
 
 
-def ejecutar(configuracionmolecula=None):
+def obtener_backends():
+    """Esta función devuelve los objetos de los servidores disponibles"""
+    # Se cargan las credenciales
+    _cargar_credenciales()
+    return gestortrasero.get_servidores_reales(), gestortrasero.get_servidores_simuladores()
+
+
+def ejecutar_ibmq_vqe(configuracionproblema=None, configuracionmolecula=None):
     """Lanza la ejecución principal del programa"""
 
-    # Se cargan las credenciales, se establece la conexión con IBMQ y se cargan los listados de servidores
-    interfazdeusuario.bienvenida()
-    """
-    credendialescargadas = False
-    while not credendialescargadas:
-        if gestortrasero.cargar_servidores():
-            credendialescargadas = True
-        else:
-            time.sleep(3)
-        interfazdeusuario.mostrar_credenciales(credendialescargadas)
-    """
+    if not configuracionmolecula and configuracionproblema:
+        raise Exception("Debe proporcionar dos parámetros, no solo uno")
 
-    # Se elije el modo de ejecución ["linea de comandos", "interfaz grafica" o "aplicacion web"]
-    if config.mododeejecucion == "linea de comandos":
+    elif configuracionmolecula and configuracionproblema:
+        raise Exception("Debe proporcionar dos parámetros, no solo uno")
+
+    elif not configuracionmolecula and not configuracionproblema:
         # MODO LÍNEA DE COMANDOS
+        interfazdeusuario.bienvenida()
 
         # Se despiertan a los supervisores necesarios
         supervisorderesultados = SupervisorDeResultados("supervisor de resultados", interfazdeusuario=interfazdeusuario)
 
         # Lectura del los archivos de configuración del problema
         configuracionmolecula = interfazdeusuario.preguntar_configuracion()
-        if configuracionmolecula is None:
+        if not configuracionmolecula:
             configuracionmolecula = interfazsistema.importar_propiedades("properties", "molecula.json")
-        configuracionaqua = interfazsistema.importar_propiedades("properties", "problema.json")
+        configuracionproblema = interfazsistema.importar_propiedades("properties", "problema.json")
 
         # Paso 1: cálculo de la molécula
         molecula = interfazdemodulos.procesar_molecula(configuracionmolecula)
 
         # Paso 2: preparar el hamiltoniano
         propiedadesmolecula = interfazdemodulos.leer_propiedades_molecula(molecula, supervisorderesultados)
-        operadores = interfazdemodulos.obtener_operadores_hamiltonianos(propiedadesmolecula, configuracionaqua)
+        operadores = interfazdemodulos.obtener_operadores_hamiltonianos(propiedadesmolecula, configuracionproblema)
         interfazdemodulos.calcular_energia_clasico(propiedadesmolecula,
                                                    operadores["operadorqubit"],
                                                    operadores["energy_shift"],
-                                                   supervisorderesultados)
+                                                   supervisorderesultados
+                                                   )
 
         # Paso 3: Configurar problema y cargar de Aqua los algoritmos
-        cobyla = interfazdemodulos.configurar_COBYLA(configuracionaqua)
-        HF = interfazdemodulos.configurar_hartreefock(operadores["operadorqubit"], configuracionaqua, propiedadesmolecula)
-        UCCSD = interfazdemodulos.configurar_UCCSD(operadores["operadorqubit"], configuracionaqua, propiedadesmolecula, HF)
+        cobyla = interfazdemodulos.configurar_COBYLA(configuracionproblema)
+        HF = interfazdemodulos.configurar_hartreefock(operadores["operadorqubit"],
+                                                      configuracionproblema,
+                                                      propiedadesmolecula
+                                                      )
+        UCCSD = interfazdemodulos.configurar_UCCSD(operadores["operadorqubit"],
+                                                   configuracionproblema,
+                                                   propiedadesmolecula,
+                                                   HF
+                                                   )
         VQE = interfazdemodulos.configurar_VQE(operadores["operadorqubit"], UCCSD, cobyla)
 
         # Paso 4: Configurar la ejecucion
         resultados = VQE.run()
         interfazdeusuario.mostrar_resultados(resultados, propiedadesmolecula, operadores)
-    elif config.mododeejecucion == "aplicacion web":
+
+    elif configuracionmolecula and configuracionproblema:
+        # MODO API
 
         # Se despiertan a los supervisores necesarios
-        supervisorderesultados = SupervisorDeResultados("supervisor de resultados", interfazdeusuario=interfazdeusuario)
-
-        # Lectura del los archivos de configuración del problema
-        configuracionaqua = interfazsistema.importar_propiedades("properties", "problema.json")
+        supervisorderesultados = SupervisorDeResultadosParaAPI("supervisor de resultados para API")
 
         # Paso 1: cálculo de la molécula
         molecula = interfazdemodulos.procesar_molecula(configuracionmolecula)
 
         # Paso 2: preparar el hamiltoniano
         propiedadesmolecula = interfazdemodulos.leer_propiedades_molecula(molecula, supervisorderesultados)
-        operadores = interfazdemodulos.obtener_operadores_hamiltonianos(propiedadesmolecula, configuracionaqua)
+        operadores = interfazdemodulos.obtener_operadores_hamiltonianos(propiedadesmolecula, configuracionproblema)
         interfazdemodulos.calcular_energia_clasico(propiedadesmolecula,
                                                    operadores["operadorqubit"],
                                                    operadores["energy_shift"],
-                                                   supervisorderesultados)
+                                                   supervisorderesultados
+                                                   )
 
         # Paso 3: Configurar problema y cargar de Aqua los algoritmos
-        cobyla = interfazdemodulos.configurar_COBYLA(configuracionaqua)
-        HF = interfazdemodulos.configurar_hartreefock(operadores["operadorqubit"], configuracionaqua, propiedadesmolecula)
-        UCCSD = interfazdemodulos.configurar_UCCSD(operadores["operadorqubit"], configuracionaqua, propiedadesmolecula, HF)
+        cobyla = interfazdemodulos.configurar_COBYLA(configuracionproblema)
+        HF = interfazdemodulos.configurar_hartreefock(operadores["operadorqubit"],
+                                                      configuracionproblema,
+                                                      propiedadesmolecula
+                                                      )
+        UCCSD = interfazdemodulos.configurar_UCCSD(operadores["operadorqubit"],
+                                                   configuracionproblema,
+                                                   propiedadesmolecula,
+                                                   HF
+                                                   )
         VQE = interfazdemodulos.configurar_VQE(operadores["operadorqubit"], UCCSD, cobyla)
 
         # Paso 4: Configurar la ejecucion
         resultados = VQE.run()
-        interfazdeusuario.mostrar_resultados(resultados, propiedadesmolecula, operadores)
+        consola = supervisorderesultados.get_consola()
 
-    elif config.mododeejecucion == "api":
-        pass
+        return resultados, consola
+
+
+def ejecutar_numero_aleatorio(cifras=None, backend=None):
+    """Esta función permite calcular un número aleatorio"""
+    # Se compone el circuito basado en Qiskit
+    circuito = interfazdemodulos.circuito_numeros_aleatorios(cifras)
+    # Se envía el circuito para su ejecución
+    resultados = gestortrasero.procesar_circuito(circuito, backend, cifras).item()
+    # Se procesa el resultado
+    mayori, mayorj = 0
+    for i, j in resultados:
+        if int(j) > int(mayorj):
+            mayori = i
+            mayorj = j
+    print(mayori, mayorj)
+    return mayori
+
+
+def _cargar_credenciales(interfazdeusuario=None):
+    """Esta función auxiliar permite cargar las credenciales y establecer la conexión con IBMQ"""
+    credendialescargadas = False
+    while not credendialescargadas:
+        if gestortrasero.cargar_servidores():
+            credendialescargadas = True
+        else:
+            time.sleep(1)
+
+        if interfazdeusuario:
+            interfazdeusuario.mostrar_credenciales(credendialescargadas)

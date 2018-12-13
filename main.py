@@ -1,21 +1,18 @@
-from dependencies import lectorjson
+"""Ejecución principal"""
 
-# Variables globales de la ejecucion
-import config
 
-if __name__ == "__main__":
-    mododeejecucion = lectorjson.importar_propiedades("properties", "modo.json")["modo"]
-    config.mododeejecucion = mododeejecucion
-
-    if mododeejecucion == "linea de comandos":
+def main(mododeejecucion=None):
+    """Ejecución principal"""
+    if mododeejecucion:
         import ibmq_chemical_core
-        import ibmq_chemical_comun
         ibmq_chemical_core.orquestador.ejecutar()
-
-    elif mododeejecucion == "aplicacion web":
+    elif not mododeejecucion:
         from ibmq_chemical_web import aplicacion
-
         aplicacion.run(port=8080)
 
-    elif mododeejecucion == "api":
         from ibmq_chemical_api import api
+        api.run(port=9090)
+
+
+if __name__ == "__main__":
+    main()

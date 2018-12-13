@@ -1,11 +1,8 @@
 """Esta clase crea un gestor de las conexiones con las máquinas cuánticas de IBM y los simuladores de Quiskit"""
 
-# Conexiones por arquitectura
-from ibmq_chemical_core import orquestador
-from ibmq_chemical_core.gestordetareas import GestorDeTareas
-
 # importa módulos
 import qiskit
+import time
 
 # Variables globales
 __servidoresreales = []
@@ -28,7 +25,7 @@ def get_servidores_reales():
     # Se precisa eliminar los simuladores de esta lista
     servidoresreales = []
     for servidor in __servidoresreales:
-        if not servidor.configuration()["simulator"]:
+        if not servidor.configuration()["simulator"] and servidor.status()['operational']:
             servidoresreales.append(servidor)
     return servidoresreales
 
@@ -38,17 +35,32 @@ def get_servidores_simuladores():
     return __servidoressimuladores
 
 
-def enviar_circuito():
-    pass
+def procesar_circuito(circuito, backend, qubitsminimo=None):
+    """Esta función recibe un circuito cuántico, lo trata, y devuelve los resultados"""
+    if not backend.status()['operational']:
+        raise Exception("La maquina seleccionada para la ejecución está en mantenimiento; repita y escoja otra")
+
+    if qubitsminimo:
+        if int(backend.configuration()['n_qubits']) >= qubitsminimo:
+            raise Exception("La máquina elegida tiene menos cubits de los necesarios para desplegar el circuito")
+
+    tarea = _enviar_circuito(circuito, backend)
+    resultados = _recibir_circuito(tarea, circuito)
+    return resultados
 
 
-def enviar_tarea():
-    pass
+def _enviar_circuito(circuito, backend):
+    """Esta función envía un circuito al backend deseado"""
+    return qiskit.execute(circuito, backend=backend, shots=1000)
 
 
-def recibir_circuito():
-    pass
-
-
-def recibir_tarea():
-    pass
+def _recibir_circuito(tarea, circuito):
+    """Esta función insiste en recolectar los resultados hasta que lo consigue"""
+    while True:
+        try:
+            resultadocompleto = tarea.result(timeout=10)
+            if ('status' not in resultadocompleto.keys()):
+                resultado = resultadocompleto.get_counts(circuito)
+                return resultado
+        except:
+            time.sleep(5)

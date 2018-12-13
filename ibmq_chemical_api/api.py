@@ -2,32 +2,49 @@
 
 # Conexiones por arquitectura
 import ibmq_chemical_core
+import ibmq_chemical_comun
 
 # Dependencias
 from ibmq_chemical_api import api
-from flask import request, redirect
-
-consola = []
-resultados = {"resultados": ""}
+from flask import request
+import json
 
 
-@api.route("/", methods=["GET"])
-def index():
-    """Esta función solicita a la API el calculo"""
-    configuracionmolecula = request.get_json()
-    ibmq_chemical_core.orquestador.ejecutar(configuracionmolecula)
-    consola = get_consola()
-    resultados = {"consola": consola}
-    return resultados
+@api.route("/servidores", methods=["GET"])
+def servidores_get():
+    """Esta función devuelve los backend que el usuario puede escoger"""
+    servidoresreales, servidoressimuladores = ibmq_chemical_core.orquestador.obtener_backends()
+    servidores = []
+    servidores.extend(servidoresreales)
+    servidores.extend(servidoressimuladores)
+    return json.dumps(servidores)
 
 
-def mostrar_mensaje_consola(mensaje):
-    consola.append(mensaje)
+@api.route("/ejecutar_ibmq_vqe", methods=["POST"])
+def ejecutar_ibmq_vqe_post():
+    """Esta función permite realiza el cálculo del VQE en Qiskit Aqua de IBMQ"""
+    configuracion = request.get_json()
+    configuracionproblema = configuracion["problema"]
+    configuracionmolecula = configuracion["molecula"]
+    resultados, consola = ibmq_chemical_core.orquestador.ejecutar_ibmq_vqe(configuracionproblema, configuracionmolecula)
+    return _crear_json_resultados(resultados, consola)
 
 
-def get_consola():
-    return consola
+@api.route("/ejecutar_numero_aleatorio", methods=["GET"])
+def ejecutar_numero_aleatorio_get():
+    """Esta función deuelve al usuario un objeto JSON con un número aleatorio de las cifras requeridas"""
+    cifras = request.form.get("cifras")
+    backend = request.form.get("backend")
+    resultado = ibmq_chemical_core.orquestador.ejecutar_numero_aleatorio(cifras, backend)
+    return _crear_json_resultados(resultado)
 
 
-def get_resultados():
-    return resultados
+def _crear_json_resultados(resultado, consola=None):
+    """Esta función encapsula en un archivo JSON algún cálculo"""
+    nombre = ibmq_chemical_comun.interfazsistema.generar_nombre()
+
+    archivo = {"nombre": nombre,
+               "resultado": resultado,
+               "consola": consola
+               }
+    return json.dumps(archivo)

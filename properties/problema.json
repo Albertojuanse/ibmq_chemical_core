@@ -1,1 +1,1 @@
-{"general": {"tipo_de_mapeo": "parity"}, "COBYLA": {"max_eval": 200}, "UCCSD": {"profundidad": 1, "orbitales_activos_ocupados": [0], "orbitales_activos_no_ocupados":[0, 1], "numero_de_slices": 1}}
+{"general": {"tipo_de_mapeo": "parity"}, "COBYLA": {"max_eval": 200}, "UCCSD": {"profundidad": 1, "orbitales_activos_ocupados": [0], "orbitales_activos_no_ocupados": [0, 1], "numero_de_slices": 1}}

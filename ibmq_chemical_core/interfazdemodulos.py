@@ -1,7 +1,9 @@
 """Esta clase servirá de enlace entre Quiskit, drivers... y el cliente"""
 
 # Conexiones por arquitectura
-from ibmq_chemical_core import orquestador
+
+# Dependencias de Qiskit
+from qiskit import QuantumCircuit,QuantumRegister, ClassicalRegister
 
 # Dependencias de aqua
 from qiskit_aqua_chemistry.drivers import ConfigurationManager
@@ -13,6 +15,8 @@ from qiskit_aqua import (get_algorithm_instance, get_optimizer_instance,
 # Otras dependencias
 from dependencies.eventos import Evento
 import dependencies.integrals
+
+# Funciones necesarias para ejecutar ibmq_vqe
 
 
 def __procesar_molecula_pyscf(configuracionmolecula):
@@ -168,3 +172,18 @@ def configurar_VQE(operadorqubit, UCCSD, cobyla):
     VQE.setup_quantum_backend(backend='statevector_simulator')
     VQE.init_args(operadorqubit, 'matrix', UCCSD, cobyla)
     return VQE
+
+# Otras funciones
+
+
+def circuito_numeros_aleatorios(cifras=None):
+    """Esta función genera un circuito con el que obtener números aleatorios de n cifras"""
+    if not cifras:
+        cifras = 5
+    registroscuanticos = QuantumRegister(cifras)
+    registrosclasicos = ClassicalRegister(cifras)
+    circuito = QuantumCircuit(registroscuanticos, registrosclasicos)
+    for i in range(cifras):
+        circuito.h(registroscuanticos[i])
+    circuito.measure(registroscuanticos, registrosclasicos)
+    return circuito

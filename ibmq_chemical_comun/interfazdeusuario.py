@@ -5,20 +5,10 @@
 from ibmq_chemical_web import modelo
 from ibmq_chemical_api import api
 
-# Variables globales
-import config
-
 
 def __mostrar_mensaje_consola(mensaje):
     """Esta función imprime en la consola de usuario un mensaje"""
-    if config.mododeejecucion == "linea de comandos":
-        print(mensaje)
-
-    elif config.mododeejecucion == "aplicacion web":
-        modelo.mostrar_mensaje_consola(mensaje)
-
-    elif config.mododeejecucion == "api":
-        api.mostrar_mensaje_consola(mensaje)
+    print(mensaje)
 
 
 def __hacer_pregunta(mensaje):

@@ -12,6 +12,7 @@ class Supervisor:
         self.contenidoevento = {}
         if interfazdeusuario:
             self.interfazdeusuario = interfazdeusuario
+        self.consola = []
 
     def en_evento(self, evento):
         """Esta función define el comportamiento del supervisor"""
@@ -28,6 +29,18 @@ class SupervisorDeResultados(Supervisor):
     def en_evento(self, evento):
         """Comportamiento del supervisor ante un evento"""
         self.interfazdeusuario.mostrar_informe_supervisor(self, evento)
+
+
+class SupervisorDeResultadosParaAPI(Supervisor):
+    """Supervisor de resultados para la API"""
+
+    def en_evento(self, evento):
+        """Comportamiento del supervisor ante un evento"""
+        self.consola.append(evento.getcontenido()["mensaje"])
+
+    def get_consola(self):
+        """Devuelve la consola a mostrar"""
+        return self.consola
 
 
 class Evento:
