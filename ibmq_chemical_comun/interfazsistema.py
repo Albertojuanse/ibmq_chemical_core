@@ -61,7 +61,11 @@ def generar_propieties_por_defecto():
 
 def importar_imagenes(nombres_iconos):
     """Esta función devuelve un listado de las rutas completas de los recursos que se le indique"""
-    return nombres_iconos
+    iconos = []
+    for nombre in nombres_iconos:
+        ruta_intermedia = os.path.join("ibmq_chemical_grafica", "imagenes")
+        iconos.append(__generar_ruta(ruta_intermedia, nombre))
+    return iconos
 
 
 def generar_nombre():
