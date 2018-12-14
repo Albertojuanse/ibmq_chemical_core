@@ -4,35 +4,44 @@
 import qiskit
 import time
 
-# Variables globales
-__servidoresreales = []
-__servidoressimuladores = []
+
+def cargar_credenciales(interfazdeusuario=None):
+    """Esta función auxiliar permite cargar las credenciales y establecer la conexión con IBMQ"""
+    credendialescargadas = False
+    while not credendialescargadas:
+        try:
+            qiskit.IBMQ.load_accounts()
+            credendialescargadas = True
+        except:
+            time.sleep(1)
+
+        if interfazdeusuario:
+            interfazdeusuario.mostrar_credenciales(credendialescargadas)
 
 
 def cargar_servidores():
-    """Esta función establece conexión con los servidores de IBMQ y los servidores disponibles"""
+    """Esta función sondea a que servidores se tiene acceso"""
     try:
-        qiskit.IBMQ.load_accounts()
-        __servidoresreales = qiskit.IBMQ.backends()
-        __servidoressimuladores = qiskit.Aer.backends()
-        return True
+        servidoresreales = qiskit.IBMQ.backends()
+        servidoressimuladores = qiskit.Aer.backends()
+        return servidoresreales, servidoressimuladores
     except:
-        return False
+        time.sleep(5)
 
 
-def get_servidores_reales():
+def get_servidores_reales(servidoresreales):
     """Esta función devuelve un listado con los servidores reales disponibles en linea"""
     # Se precisa eliminar los simuladores de esta lista
-    servidoresreales = []
-    for servidor in __servidoresreales:
+    listaservidoresreales = []
+    for servidor in servidoresreales:
         if not servidor.configuration()["simulator"] and servidor.status()['operational']:
-            servidoresreales.append(servidor)
-    return servidoresreales
+            listaservidoresreales.append(servidor)
+    return listaservidoresreales
 
 
-def get_servidores_simuladores():
+def get_servidores_simuladores(servidoressimuladores):
     """Esta función devuelve un listado con los servidores reales disponibles en linea"""
-    return __servidoressimuladores
+    return servidoressimuladores
 
 
 def procesar_circuito(circuito, backend, qubitsminimo=None):

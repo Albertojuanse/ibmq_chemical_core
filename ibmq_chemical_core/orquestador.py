@@ -12,8 +12,11 @@ from dependencies.eventos import SupervisorDeResultados,  SupervisorDeResultados
 def obtener_backends():
     """Esta función devuelve los objetos de los servidores disponibles"""
     # Se cargan las credenciales
-    _cargar_credenciales()
-    return gestortrasero.get_servidores_reales(), gestortrasero.get_servidores_simuladores()
+    gestortrasero.cargar_credenciales()
+    servidoresreales, servidoressimuladores = gestortrasero.cargar_servidores()
+    listaservidoresreales = gestortrasero.get_servidores_reales(servidoresreales)
+    listaservidoressimuladores = gestortrasero.get_servidores_simuladores(servidoressimuladores)
+    return listaservidoresreales, listaservidoressimuladores
 
 
 def ejecutar_ibmq_vqe(configuracionproblema=None, configuracionmolecula=None):
@@ -22,7 +25,7 @@ def ejecutar_ibmq_vqe(configuracionproblema=None, configuracionmolecula=None):
     if not configuracionmolecula and configuracionproblema:
         raise Exception("Debe proporcionar dos parámetros, no solo uno")
 
-    elif configuracionmolecula and configuracionproblema:
+    elif configuracionmolecula and not configuracionproblema:
         raise Exception("Debe proporcionar dos parámetros, no solo uno")
 
     elif not configuracionmolecula and not configuracionproblema:
@@ -99,7 +102,7 @@ def ejecutar_ibmq_vqe(configuracionproblema=None, configuracionmolecula=None):
         VQE = interfazdemodulos.configurar_VQE(operadores["operadorqubit"], UCCSD, cobyla)
 
         # Paso 4: Configurar la ejecucion
-        resultados = VQE.run()
+        resultados = VQE.run()["energy"]
         consola = supervisorderesultados.get_consola()
 
         return resultados, consola
@@ -119,16 +122,3 @@ def ejecutar_numero_aleatorio(cifras=None, backend=None):
             mayorj = j
     print(mayori, mayorj)
     return mayori
-
-
-def _cargar_credenciales(interfazdeusuario=None):
-    """Esta función auxiliar permite cargar las credenciales y establecer la conexión con IBMQ"""
-    credendialescargadas = False
-    while not credendialescargadas:
-        if gestortrasero.cargar_servidores():
-            credendialescargadas = True
-        else:
-            time.sleep(1)
-
-        if interfazdeusuario:
-            interfazdeusuario.mostrar_credenciales(credendialescargadas)

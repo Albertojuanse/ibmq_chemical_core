@@ -2,10 +2,12 @@
 {% extends "base.html" %}
 
 {% block ejecutado %}
-        <p>El programa se ha ejecutado con la siguiente salida de consola:</p><br>
+    <p>El programa se ha ejecutado con la siguiente salida de consola:</p><br>
+    <p>Identificador de la ejecución: {{ nombre }}</p>
+    <p>Resultado de la ejecución: {{ resultado }}</p><br><br>
 {% endblock %}
 {% block consola %}
-    {% for linea in lineas %}
+    {% for linea in consola %}
         <p>{{ linea }}</p>
     {% endfor %}
 {% endblock %}

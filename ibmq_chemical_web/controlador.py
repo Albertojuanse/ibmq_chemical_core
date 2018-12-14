@@ -15,12 +15,12 @@ def index():
 
 
 @aplicacion.route("/", methods=["POST"])
-def ejecutar():
+def ejecutar_ibmq_vqe_post():
     """Esta función recibe los datos del usuario y se los pasa al controlador"""
-    return modelo.ejecutar(request)
+    return modelo.ejecutar_ibmq_vqe(request)
 
 
 @aplicacion.route("/resultados", methods=["GET"])
-def ejecutado():
+def resultados():
     """Esta función solicita a la vista el index"""
-    return vista.ejecutado()
+    return "SIN RESULTADOS"

@@ -3,7 +3,6 @@
 # Conexiones por arquitectura
 # una es la consola del propio intérprete de ejecución
 from ibmq_chemical_web import modelo
-from ibmq_chemical_api import api
 
 
 def __mostrar_mensaje_consola(mensaje):

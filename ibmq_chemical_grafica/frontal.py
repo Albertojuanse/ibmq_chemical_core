@@ -25,28 +25,28 @@ class InterfazDeUsuario:
 
         # Se inicializan las variables
         self.molecula = {"driver": "PYSCF",
-                    "configuracion":
-                        {"properties":
-                            {"atom": "Li .0 .0 .0; H .0 .0 1.6",
-                             "unit": "Angstrom",
-                             "charge": 0,
-                             "spin": 0,
-                             "basis": "sto3g"}
-                         }
-                    }
-        self.problema = {"general": {"tipo_de_mapeo": "parity"},
-                    "COBYLA": {"max_eval": 200},
-                    "UCCSD": {"profundidad": 1,
-                              "orbitales_activos_ocupados": [0],
-                              "orbitales_activos_no_ocupados": [0, 1],
-                              "numero_de_slices": 1
+                         "configuracion":
+                             {"properties": {"atom": "Li .0 .0 .0; H .0 .0 1.6",
+                                             "unit": "Angstrom",
+                                             "charge": 0,
+                                             "spin": 0,
+                                             "basis": "sto3g"
+                                             }
                               }
-                    }
+                         }
+        self.problema = {"general": {"tipo_de_mapeo": "parity"},
+                         "COBYLA": {"max_eval": 200},
+                         "UCCSD": {"profundidad": 1,
+                                   "orbitales_activos_ocupados": [0],
+                                   "orbitales_activos_no_ocupados": [0, 1],
+                                   "numero_de_slices": 1
+                                   }
+                         }
 
         self.resultados = {"nombre": "",
-                      "resultado": "",
-                      "consola": []
-                      }
+                           "resultado": "",
+                           "consola": []
+                           }
         self.MOL_DRIVER = StringVar(self.raiz, value=self.molecula['driver'])
         self.MOL_ATOM = StringVar(self.raiz, value=self.molecula["configuracion"]["properties"]["atom"])
         self.MOL_UNIT = StringVar(self.raiz, value=self.molecula["configuracion"]["properties"]["unit"])
@@ -176,7 +176,7 @@ class InterfazDeUsuario:
         self.elementos.rowconfigure(11, weight=1)
         self.RES_BOTON_DEFECTO = ttk.Button(self.elementos, text="Por defecto", command=self.valores_por_defecto)
         self.RES_BOTON_DEFECTO.grid(row=12, column=0, padx=5, pady=5, sticky=(N, S, E, W))
-        self.RES_BOTON_ENVIAR = ttk.Button(self.elementos, text="Enviar", command=self.ejecutar_vqe)
+        self.RES_BOTON_ENVIAR = ttk.Button(self.elementos, text="Enviar", command=self.ejecutar_ibmq_vqe)
         self.RES_BOTON_ENVIAR.grid(row=12, column=1, padx=5, pady=5, sticky=(N, S, E, W))
         self.elementos.rowconfigure(12, weight=1)
         self.RES_SEPAR = ttk.Separator(self.elementos, orient=HORIZONTAL)
@@ -289,22 +289,21 @@ class InterfazDeUsuario:
         self.RES_RES.set(resultados["resultado"])
         self.RES_CON.set(resultados["consola"])
 
-    def ejecutar_vqe(self):
+    def ejecutar_ibmq_vqe(self):
         self.molecula['driver'] = self.MOL_DRIVER.get()
         self.molecula["configuracion"]["properties"]["atom"] = self.MOL_ATOM.get()
         self.molecula["configuracion"]["properties"]["unit"] = self.MOL_UNIT.get()
-        self.molecula["configuracion"]["properties"]["charge"] = self.MOL_CHARGE.get()
-        self.molecula["configuracion"]["properties"]["spin"] = self.MOL_SPIN.get()
+        self.molecula["configuracion"]["properties"]["charge"] = int(self.MOL_CHARGE.get())
+        self.molecula["configuracion"]["properties"]["spin"] = int(self.MOL_SPIN.get())
         self.molecula["configuracion"]["properties"]["basis"] = self.MOL_BASIS.get()
         self.problema["general"]["tipo_de_mapeo"] = self.PRO_MAPEO.get()
-        self.problema["COBYLA"]["max_eval"] = self.PRO_COBYLA_MAXEVAL.get()
-        self.problema["UCCSD"]["profundidad"] = self.PRO_UCCSD_PROF.get()
+        self.problema["COBYLA"]["max_eval"] = int(self.PRO_COBYLA_MAXEVAL.get())
+        self.problema["UCCSD"]["profundidad"] = int(self.PRO_UCCSD_PROF.get())
 
         valor_usuario = self.PRO_UCCSD_OAO.get()
         valor = []
         for elemento in valor_usuario:
             if not elemento == " " and not elemento == "(" and not elemento == ")" and not elemento == ",":
-                print(elemento)
                 valor.append(int(elemento))
         self.problema["UCCSD"]["orbitales_activos_ocupados"] = valor
 
@@ -315,16 +314,27 @@ class InterfazDeUsuario:
                 valor.append(int(elemento))
         self.problema["UCCSD"]["orbitales_activos_no_ocupados"] = valor
 
-        self.problema["UCCSD"]["numero_de_slices"] = self.PRO_UCCSD_SLICES.get()
-        self.resultados["nombre"] = self.RES_NOM.get()
-        self.resultados["resultado"] = self.RES_RES.get()
-        self.resultados["consola"] = self.RES_CON.get()
-
-        self.resultados = zaga.ejecutar_vqe(self.molecula, self.problema)
-
+        self.problema["UCCSD"]["numero_de_slices"] = int(self.PRO_UCCSD_SLICES.get())
         self.RES_NOM.set(self.resultados["nombre"])
         self.RES_RES.set(self.resultados["resultado"])
         self.RES_CON.set(self.resultados["consola"])
+
+        zaga.ejecutar_vqe(self.molecula, self.problema, self)
+
+    def mostrar_resultados(self, resultados):
+        if not self.resultados["nombre"] == resultados["nombre"]:
+            self.resultados = resultados
+            self.RES_NOM.set(self.resultados["nombre"])
+            self.RES_RES.set(self.resultados["resultado"])
+            self.RES_CON.set(self.resultados["consola"])
+        else:
+            self.resultados = {"nombre": "Sin nombre",
+                               "resultado": "Sin resultados",
+                               "consola": []
+                               }
+            self.RES_NOM.set(self.resultados["nombre"])
+            self.RES_RES.set(self.resultados["resultado"])
+            self.RES_CON.set(self.resultados["consola"])
 
     def ejecutar_aleatorios(self):
         pass
