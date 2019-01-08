@@ -7,6 +7,7 @@ from ibmq_chemical_core import gestortrasero, interfazdemodulos
 # Dependencias
 import time
 from dependencies.eventos import SupervisorDeResultados,  SupervisorDeResultadosParaAPI
+import numpy
 
 # Variables globales
 listaservidoresreales = []
@@ -31,65 +32,44 @@ def configurar_backend(nombre_backend):
     gestortrasero.set_servidor(nombre_backend)
 
 
-def ejecutar_ibmq_vqe(configuracionproblema=None, configuracionmolecula=None):
+def get_backend():
+    """Esta función recupera del gestor trasero el servidor configurado"""
+    return gestortrasero.get_servidor()
+
+
+def set_backend(nombre):
+    """Esta función configura en el gestor trasero el servidor"""
+    return gestortrasero.set_servidor(nombre)
+
+
+def ejecutar_ibmq_vqe(configuracionproblema=None,
+                      configuracionmolecula=None,
+                      interfazdeusuario_local=None,
+                      dibujo=None,
+                      backend='statevector_simulator'):
     """Lanza la ejecución principal del programa"""
 
-    if not configuracionmolecula and configuracionproblema:
-        raise Exception("Debe proporcionar dos parámetros, no solo uno")
-
-    elif configuracionmolecula and not configuracionproblema:
-        raise Exception("Debe proporcionar dos parámetros, no solo uno")
-
-    elif not configuracionmolecula and not configuracionproblema:
+    if interfazdeusuario:
         # MODO LÍNEA DE COMANDOS
         interfazdeusuario.bienvenida()
-
         # Se despiertan a los supervisores necesarios
-        supervisorderesultados = SupervisorDeResultados("supervisor de resultados", interfazdeusuario=interfazdeusuario)
-
+        supervisorderesultados = SupervisorDeResultados("supervisor de resultados",
+                                                        interfazdeusuario=interfazdeusuario)
         # Lectura del los archivos de configuración del problema
         configuracionmolecula = interfazdeusuario.preguntar_configuracion()
-        if not configuracionmolecula:
-            configuracionmolecula = interfazsistema.importar_propiedades("properties", "molecula.json")
-        configuracionproblema = interfazsistema.importar_propiedades("properties", "problema.json")
-
-        # Paso 1: cálculo de la molécula
-        molecula = interfazdemodulos.procesar_molecula(configuracionmolecula)
-
-        # Paso 2: preparar el hamiltoniano
-        propiedadesmolecula = interfazdemodulos.leer_propiedades_molecula(molecula, supervisorderesultados)
-        operadores = interfazdemodulos.obtener_operadores_hamiltonianos(propiedadesmolecula, configuracionproblema)
-        interfazdemodulos.calcular_energia_clasico(propiedadesmolecula,
-                                                   operadores["operadorqubit"],
-                                                   operadores["energy_shift"],
-                                                   supervisorderesultados
-                                                   )
-
-        # Paso 3: Configurar problema y cargar de Aqua los algoritmos
-        cobyla = interfazdemodulos.configurar_COBYLA(configuracionproblema)
-        HF = interfazdemodulos.configurar_hartreefock(operadores["operadorqubit"],
-                                                      configuracionproblema,
-                                                      propiedadesmolecula
-                                                      )
-        UCCSD = interfazdemodulos.configurar_UCCSD(operadores["operadorqubit"],
-                                                   configuracionproblema,
-                                                   propiedadesmolecula,
-                                                   HF
-                                                   )
-        VQE = interfazdemodulos.configurar_VQE(operadores["operadorqubit"], UCCSD, cobyla)
-
-        # Paso 4: Configurar la ejecucion
-        resultados = VQE.run()
-        interfazdeusuario.mostrar_resultados(resultados, propiedadesmolecula, operadores)
-
-    elif configuracionmolecula and configuracionproblema:
+    else:
         # MODO API
-
         # Se despiertan a los supervisores necesarios
         supervisorderesultados = SupervisorDeResultadosParaAPI("supervisor de resultados para API")
 
+    if not configuracionmolecula:
+        configuracionmolecula = interfazsistema.importar_propiedades("properties", "molecula.json")
+    if not configuracionproblema:
+        configuracionproblema = interfazsistema.importar_propiedades("properties", "problema.json")
+
+    def lanzar_vqe(barrido=None):
         # Paso 1: cálculo de la molécula
-        molecula = interfazdemodulos.procesar_molecula(configuracionmolecula)
+        molecula = interfazdemodulos.procesar_molecula(configuracionmolecula, barrido)
 
         # Paso 2: preparar el hamiltoniano
         propiedadesmolecula = interfazdemodulos.leer_propiedades_molecula(molecula, supervisorderesultados)
@@ -111,23 +91,37 @@ def ejecutar_ibmq_vqe(configuracionproblema=None, configuracionmolecula=None):
                                                    propiedadesmolecula,
                                                    HF
                                                    )
-        VQE = interfazdemodulos.configurar_VQE(operadores["operadorqubit"], UCCSD, cobyla)
+        VQE = interfazdemodulos.configurar_VQE(operadores["operadorqubit"], UCCSD, cobyla, backend)
+        resultado = VQE.run()["energy"]
+        if interfazdeusuario_local:
+            interfazdeusuario_local.mostrar_resultados(resultado, propiedadesmolecula, operadores)
+        else:
+            consola = supervisorderesultados.get_consola()
+            supervisorderesultados.borrar_consola()
+            return resultado, consola
 
-        # Paso 4: Configurar la ejecucion
-        resultados = VQE.run()["energy"]
-        consola = supervisorderesultados.get_consola()
+    if not dibujo:
+        distancias = None
+        return lanzar_vqe(), distancias
+    else:
+        distancias = numpy.arange(0.5, 5.5, 0.1)
+        consolas = []
+        energia = numpy.zeros(1, len(distancias))
+        for i, distancia in enumerate(distancias):
+            energia[i], consolas[i] = lanzar_vqe(distancia)
+        return energia, consolas, distancias
 
-        return resultados, consola
 
-
-def ejecutar_numero_aleatorio(cifras=None, backend=servidor):
+def ejecutar_numero_aleatorio(cifras=5, servidor=None):
     """Esta función permite calcular un número aleatorio"""
     # Se compone el circuito basado en Qiskit
     circuito = interfazdemodulos.circuito_numeros_aleatorios(cifras)
+    if servidor:
+        set_backend(servidor)
     # Se envía el circuito para su ejecución
-    resultados = gestortrasero.procesar_circuito(circuito, backend, cifras).item()
+    resultados = gestortrasero.procesar_circuito(circuito, cifras).item()
     # Se procesa el resultado
-    mayori, mayorj = 0
+    mayori, mayorj = 0, 0
     for i, j in resultados:
         if int(j) > int(mayorj):
             mayori = i

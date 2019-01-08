@@ -42,8 +42,22 @@ def ejecutar_ibmq_vqe_post():
     configuracion = request.get_json()
     configuracionproblema = configuracion["problema"]
     configuracionmolecula = configuracion["molecula"]
-    resultados, consola = ibmq_chemical_core.orquestador.ejecutar_ibmq_vqe(configuracionproblema, configuracionmolecula)
-    respuesta = _crear_json_resultados(resultados, consola)
+    if configuracion["core"]["dibujo"]:
+        dibujo = configuracion["core"]["dibujo"]
+    else:
+        dibujo = None
+    if ibmq_chemical_core.orquestador.get_backend():
+        backend = ibmq_chemical_core.orquestador.get_backend().configuration()["name"]
+    else:
+        backend = 'statevector_simulator'
+
+    resultados, consola, distancias = ibmq_chemical_core.orquestador.ejecutar_ibmq_vqe(
+        configuracionproblema=configuracionproblema,
+        configuracionmolecula=configuracionmolecula,
+        dibujo=dibujo,
+        backend=backend
+    )
+    respuesta = _crear_json_resultados(resultados, consola, distancias)
     print("Respuesta: {}".format(respuesta))
     return Response(respuesta, status=200, mimetype='application/json', headers={'content-type': 'application/json'})
 
@@ -51,11 +65,14 @@ def ejecutar_ibmq_vqe_post():
 @la_api.route("/ejecutar_numero_aleatorio", methods=["GET"])
 def ejecutar_numero_aleatorio_get():
     """Esta función deuelve al usuario un objeto JSON con un número aleatorio de las cifras requeridas"""
-    cifras = request.form.get("cifras")
-    backend = request.form.get("backend")
-    resultado = ibmq_chemical_core.orquestador.ejecutar_numero_aleatorio(cifras, backend)
+    configuracion = request.get_json()
+    cifras = configuracion("cifras")
+    if configuracion("backend"):
+        backend = ibmq_chemical_core.orquestador.set_backend(configuracion("backend"))
+    else:
+        backend = None
+    resultado = ibmq_chemical_core.orquestador.ejecutar_numero_aleatorio(cifras, servidor=backend)
     respuesta = _crear_json_resultados(resultado)
-    print("Respuesta: {}".format(respuesta))
     return Response(respuesta, status=200, mimetype='application/json', headers={'content-type': 'application/json'})
 
 
@@ -71,12 +88,13 @@ def _crear_json_servidores(servidores, consola=None):
     return json.dumps(archivo)
 
 
-def _crear_json_resultados(resultado, consola=None):
+def _crear_json_resultados(resultado, consola=None, distancia=None):
     """Esta función encapsula en un archivo JSON algún cálculo"""
     nombre = ibmq_chemical_comun.interfazsistema.generar_nombre()
 
     archivo = {"nombre": nombre,
                "resultado": resultado,
-               "consola": consola
+               "consola": consola,
+               "distancias": distancia
                }
     return json.dumps(archivo)

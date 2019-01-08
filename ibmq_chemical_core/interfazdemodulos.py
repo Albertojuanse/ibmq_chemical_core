@@ -15,21 +15,46 @@ from qiskit_aqua import (get_algorithm_instance, get_optimizer_instance,
 # Otras dependencias
 from dependencies.eventos import Evento
 import dependencies.integrals
+import numpy
 
 # Funciones necesarias para ejecutar ibmq_vqe
 
 
-def __procesar_molecula_pyscf(configuracionmolecula):
+def __procesar_molecula_pyscf(configuracionmolecula, barrido=None):
     """Esta función construye una molécula usando el driver PySCF con los datos de entrada proporcionados"""
+    # Se calcula la distancia entre los átomos y se reconfigura la molécula
+    definicion_atomo = configuracionmolecula["configuracion"]["properties"]["atom"].split(";")
+    definicion_atomo_1 = definicion_atomo[0].split()
+    definicion_atomo_2 = definicion_atomo[1].split()
+    atomo1 = definicion_atomo_1[0]
+    atomo1x = definicion_atomo_1[1]
+    atomo1y = definicion_atomo_1[2]
+    atomo1z = definicion_atomo_1[3]
+    atomo2 = definicion_atomo_2[0]
+    atomo2x = definicion_atomo_2[1]
+    atomo2y = definicion_atomo_2[2]
+    atomo2z = definicion_atomo_2[3]
+
+    # Si es modo dibujo se impone la distancia
+    if barrido:
+        nueva_definicion = atomo1 + " 0 0 0;" + atomo2 + " 0 0 " + str(barrido)
+        configuracionmolecula["configuracion"]["properties"]["atom"] = nueva_definicion
+    else:
+        distancia = float(numpy.sqrt(float(numpy.power(float(atomo2x) - float(atomo1x), 2)) +
+                                     float(numpy.power(float(atomo2y) - float(atomo1y), 2)) +
+                                     float(numpy.power(float(atomo2z) - float(atomo1z), 2))
+                                     ))
+        nueva_definicion = atomo1 + " 0 0 0;" + atomo2 + " 0 0 " + str(distancia)
+        configuracionmolecula["configuracion"]["properties"]["atom"] = nueva_definicion
     molecula = dependencies.integrals.compute_integrals(configuracionmolecula["configuracion"]["properties"])
     return molecula
 
 
-def procesar_molecula(configuracionmolecula):
+def procesar_molecula(configuracionmolecula, distancia=None):
     """Esta función analiza que tipo de procesado necesita una molécula para pedir su construcción"""
     gestorconfiguracion = ConfigurationManager()
     if configuracionmolecula["driver"] == "PYSCF":
-        molecula = __procesar_molecula_pyscf(configuracionmolecula)
+        molecula = __procesar_molecula_pyscf(configuracionmolecula, distancia)
     else:
         driver = gestorconfiguracion.get_driver_instance(configuracionmolecula["driver"])
         molecula = driver.run(configuracionmolecula["configuracion"])
@@ -166,20 +191,18 @@ def configurar_UCCSD(operadorqubit, configuracionaqua, propiedadesmolecula, HF):
     return UCCSD
 
 
-def configurar_VQE(operadorqubit, UCCSD, cobyla):
+def configurar_VQE(operadorqubit, UCCSD, cobyla, backend):
     """Esta función obtiene una instancia configurada del algoritmo VQE"""
     VQE = get_algorithm_instance('VQE')
-    VQE.setup_quantum_backend(backend='statevector_simulator')
+    VQE.setup_quantum_backend(backend)
     VQE.init_args(operadorqubit, 'matrix', UCCSD, cobyla)
     return VQE
 
 # Otras funciones
 
 
-def circuito_numeros_aleatorios(cifras=None):
+def circuito_numeros_aleatorios(cifras):
     """Esta función genera un circuito con el que obtener números aleatorios de n cifras"""
-    if not cifras:
-        cifras = 5
     registroscuanticos = QuantumRegister(cifras)
     registrosclasicos = ClassicalRegister(cifras)
     circuito = QuantumCircuit(registroscuanticos, registrosclasicos)

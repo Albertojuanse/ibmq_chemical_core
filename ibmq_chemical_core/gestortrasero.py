@@ -31,6 +31,7 @@ def cargar_servidores():
     global credencialescargadas
     global servidoresreales
     global servidoressimuladores
+    global servidor
     if not credencialescargadas:
         cargar_credenciales()
 
@@ -40,8 +41,8 @@ def cargar_servidores():
             servidoressimuladores = qiskit.Aer.backends()
             servidoresreales = []
             for cada_servidor in servidoresreales_simuladores:
-                if not cada_servidor.configuration()["simulator"] and servidor.status()['operational']:
-                    servidoresreales.append(servidor)
+                if not cada_servidor.configuration()["simulator"] and cada_servidor.status()['operational']:
+                    servidoresreales.append(cada_servidor)
             servidor = servidoressimuladores[0]
             return servidoresreales, servidoressimuladores
         except:
@@ -72,16 +73,19 @@ def get_servidor():
     return servidor
 
 
-def procesar_circuito(circuito, backend, qubitsminimo=None):
+def procesar_circuito(circuito, qubitsminimo=None):
     """Esta función recibe un circuito cuántico, lo trata, y devuelve los resultados"""
-    if not backend.status()['operational']:
+    global servidor
+    if not servidor:
+        servidor = qiskit.Aer.backends()[0]
+    if not servidor.status()['operational']:
         raise Exception("La maquina seleccionada para la ejecución está en mantenimiento; repita y escoja otra")
 
     if qubitsminimo:
-        if int(backend.configuration()['n_qubits']) >= qubitsminimo:
+        if int(servidor.configuration()['n_qubits']) >= qubitsminimo:
             raise Exception("La máquina elegida tiene menos cubits de los necesarios para desplegar el circuito")
 
-    tarea = _enviar_circuito(circuito, backend)
+    tarea = _enviar_circuito(circuito, servidor)
     resultados = _recibir_circuito(tarea, circuito)
     return resultados
 

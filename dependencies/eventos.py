@@ -42,6 +42,10 @@ class SupervisorDeResultadosParaAPI(Supervisor):
         """Devuelve la consola a mostrar"""
         return self.consola
 
+    def borrar_consola(self):
+        """Pone a cero la consola"""
+        self.consola = []
+
 
 class Evento:
     """Esta clase define un evento o interrupción del programa"""
