@@ -8,15 +8,27 @@ from ibmq_chemical_core import gestortrasero, interfazdemodulos
 import time
 from dependencies.eventos import SupervisorDeResultados,  SupervisorDeResultadosParaAPI
 
+# Variables globales
+listaservidoresreales = []
+listaservidoressimuladores = []
+servidor = None
+
 
 def obtener_backends():
     """Esta función devuelve los objetos de los servidores disponibles"""
     # Se cargan las credenciales
     gestortrasero.cargar_credenciales()
-    servidoresreales, servidoressimuladores = gestortrasero.cargar_servidores()
-    listaservidoresreales = gestortrasero.get_servidores_reales(servidoresreales)
-    listaservidoressimuladores = gestortrasero.get_servidores_simuladores(servidoressimuladores)
-    return listaservidoresreales, listaservidoressimuladores
+    global listaservidoresreales
+    global listaservidoressimuladores
+    global servidor
+    listaservidoresreales, listaservidoressimuladores = gestortrasero.cargar_servidores()
+    servidor = gestortrasero.get_servidor()
+    return listaservidoresreales, listaservidoressimuladores, servidor
+
+
+def configurar_backend(nombre_backend):
+    """Esta función configura un servidor de los disponibles"""
+    gestortrasero.set_servidor(nombre_backend)
 
 
 def ejecutar_ibmq_vqe(configuracionproblema=None, configuracionmolecula=None):
@@ -108,7 +120,7 @@ def ejecutar_ibmq_vqe(configuracionproblema=None, configuracionmolecula=None):
         return resultados, consola
 
 
-def ejecutar_numero_aleatorio(cifras=None, backend=None):
+def ejecutar_numero_aleatorio(cifras=None, backend=servidor):
     """Esta función permite calcular un número aleatorio"""
     # Se compone el circuito basado en Qiskit
     circuito = interfazdemodulos.circuito_numeros_aleatorios(cifras)
