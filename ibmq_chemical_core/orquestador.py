@@ -44,12 +44,12 @@ def set_backend(nombre):
 
 def ejecutar_ibmq_vqe(configuracionproblema=None,
                       configuracionmolecula=None,
-                      interfazdeusuario_local=None,
+                      interfazdeusuario_local=False,
                       dibujo=None,
                       backend='statevector_simulator'):
     """Lanza la ejecución principal del programa"""
 
-    if interfazdeusuario:
+    if interfazdeusuario_local:
         # MODO LÍNEA DE COMANDOS
         interfazdeusuario.bienvenida()
         # Se despiertan a los supervisores necesarios
@@ -94,7 +94,7 @@ def ejecutar_ibmq_vqe(configuracionproblema=None,
         VQE = interfazdemodulos.configurar_VQE(operadores["operadorqubit"], UCCSD, cobyla, backend)
         resultado = VQE.run()["energy"]
         if interfazdeusuario_local:
-            interfazdeusuario_local.mostrar_resultados(resultado, propiedadesmolecula, operadores)
+            interfazdeusuario.mostrar_resultados(resultado, propiedadesmolecula, operadores)
         else:
             consola = supervisorderesultados.get_consola()
             supervisorderesultados.borrar_consola()
@@ -102,14 +102,14 @@ def ejecutar_ibmq_vqe(configuracionproblema=None,
 
     if not dibujo:
         distancias = None
-        return lanzar_vqe(), distancias
+        energia, consolas = lanzar_vqe()
     else:
         distancias = numpy.arange(0.5, 5.5, 0.1)
         consolas = []
         energia = numpy.zeros(1, len(distancias))
         for i, distancia in enumerate(distancias):
             energia[i], consolas[i] = lanzar_vqe(distancia)
-        return energia, consolas, distancias
+    return energia, consolas, distancias
 
 
 def ejecutar_numero_aleatorio(cifras=5, servidor=None):

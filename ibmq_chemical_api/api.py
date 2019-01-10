@@ -61,7 +61,6 @@ def ejecutar_ibmq_vqe_post():
         backend=backend
     )
     respuesta = _crear_json_resultados(resultados, consola, distancias)
-    print("Respuesta: {}".format(respuesta))
     return Response(respuesta, status=200, mimetype='application/json', headers={'content-type': 'application/json'})
 
 

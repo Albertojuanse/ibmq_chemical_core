@@ -13,5 +13,4 @@ def ejecutar_ibmq_vqe(molecula, problema, ventana_frontal):
     peticion = {"molecula": molecula, "problema": problema}
     headers = {'content-type': 'application/json'}
     respuesta_api = requests.post("http://127.0.0.1:9090/ejecutar_ibmq_vqe", headers=headers, data=json.dumps(peticion))
-    print("Respuesta en zaga: {}".format(respuesta_api.json()))
     ventana_frontal.mostrar_resultados(respuesta_api.json())
