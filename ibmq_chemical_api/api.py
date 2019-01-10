@@ -42,8 +42,11 @@ def ejecutar_ibmq_vqe_post():
     configuracion = request.get_json()
     configuracionproblema = configuracion["problema"]
     configuracionmolecula = configuracion["molecula"]
-    if configuracion["core"]["dibujo"]:
-        dibujo = configuracion["core"]["dibujo"]
+    configuracioncore = {}
+    if "core" in configuracion:
+        configuracioncore = configuracion["core"]
+    if "dibujo" in configuracioncore:
+        dibujo = configuracioncore["dibujo"]
     else:
         dibujo = None
     if ibmq_chemical_core.orquestador.get_backend():
@@ -66,9 +69,9 @@ def ejecutar_ibmq_vqe_post():
 def ejecutar_numero_aleatorio_get():
     """Esta función deuelve al usuario un objeto JSON con un número aleatorio de las cifras requeridas"""
     configuracion = request.get_json()
-    cifras = configuracion("cifras")
-    if configuracion("backend"):
-        backend = ibmq_chemical_core.orquestador.set_backend(configuracion("backend"))
+    cifras = configuracion["cifras"]
+    if "backend" in configuracion:
+        backend = ibmq_chemical_core.orquestador.set_backend(configuracion["backend"])
     else:
         backend = None
     resultado = ibmq_chemical_core.orquestador.ejecutar_numero_aleatorio(cifras, servidor=backend)

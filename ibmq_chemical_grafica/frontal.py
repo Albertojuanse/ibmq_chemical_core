@@ -319,7 +319,7 @@ class InterfazDeUsuario:
         self.RES_RES.set(self.resultados["resultado"])
         self.RES_CON.set(self.resultados["consola"])
 
-        zaga.ejecutar_vqe(self.molecula, self.problema, self)
+        zaga.ejecutar_ibmq_vqe(self.molecula, self.problema, self)
 
     def mostrar_resultados(self, resultados):
         if not self.resultados["nombre"] == resultados["nombre"]:
