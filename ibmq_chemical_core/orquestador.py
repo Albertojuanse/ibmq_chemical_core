@@ -119,7 +119,7 @@ def ejecutar_numero_aleatorio(cifras=5, servidor=None):
     if servidor:
         set_backend(servidor)
     # Se envía el circuito para su ejecución
-    resultados = gestortrasero.procesar_circuito(circuito, cifras).item()
+    resultados = gestortrasero.procesar_circuito(circuito, cifras).items()
     # Se procesa el resultado
     mayori, mayorj = 0, 0
     for i, j in resultados:
