@@ -14,16 +14,16 @@ servidor = None
 
 def cargar_credenciales(interfazdeusuario=None):
     """Esta función auxiliar permite cargar las credenciales y establecer la conexión con IBMQ"""
-    global credendialescargadas
-    while not credendialescargadas:
+    global credencialescargadas
+    while not credencialescargadas:
         try:
             qiskit.IBMQ.load_accounts()
-            credendialescargadas = True
+            credencialescargadas = True
         except:
             time.sleep(0.5)
 
         if interfazdeusuario:
-            interfazdeusuario.mostrar_credenciales(credendialescargadas)
+            interfazdeusuario.mostrar_credenciales(credencialescargadas)
 
 
 def cargar_servidores():
@@ -37,7 +37,7 @@ def cargar_servidores():
 
     while not servidorescargados:
         try:
-            servidoresreales_simuladores = qiskit.IBMQ.qiskit.IBMQ.backends()
+            servidoresreales_simuladores = qiskit.IBMQ.backends()
             servidoressimuladores = qiskit.Aer.backends()
             servidoresreales = []
             for cada_servidor in servidoresreales_simuladores:
@@ -77,12 +77,12 @@ def procesar_circuito(circuito, qubitsminimo=None):
     """Esta función recibe un circuito cuántico, lo trata, y devuelve los resultados"""
     global servidor
     if not servidor:
-        servidor = qiskit.Aer.backends()[0]
+        cargar_servidores()
     if not servidor.status()['operational']:
         raise Exception("La maquina seleccionada para la ejecución está en mantenimiento; repita y escoja otra")
 
     if qubitsminimo:
-        if int(servidor.configuration()['n_qubits']) >= qubitsminimo:
+        if not servidor.configuration()["simulator"] and int(servidor.configuration()['n_qubits']) >= qubitsminimo:
             raise Exception("La máquina elegida tiene menos cubits de los necesarios para desplegar el circuito")
 
     tarea = _enviar_circuito(circuito, servidor)
@@ -100,8 +100,7 @@ def _recibir_circuito(tarea, circuito):
     while True:
         try:
             resultadocompleto = tarea.result(timeout=10)
-            if ('status' not in resultadocompleto.keys()):
-                resultado = resultadocompleto.get_counts(circuito)
-                return resultado
+            resultado = resultadocompleto.get_counts(circuito)
+            return resultado
         except:
             time.sleep(5)
