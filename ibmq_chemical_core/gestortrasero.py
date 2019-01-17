@@ -61,7 +61,7 @@ def set_servidor(nombre_backend):
     global servidor
     if not servidorescargados:
         cargar_servidores()
-    for objeto_servidor in servidoressimuladores:
+    for objeto_servidor in servidoresreales:
         if str(objeto_servidor.configuration()["name"]) == nombre_backend:
             servidor = objeto_servidor
             return True
@@ -89,7 +89,7 @@ def procesar_circuito(circuito, qubitsminimo=None):
     if qubitsminimo:
         if not servidor.configuration()["simulator"] and int(servidor.configuration()['n_qubits']) >= qubitsminimo:
             raise Exception("La máquina elegida tiene menos cubits de los necesarios para desplegar el circuito")
-
+    print(servidor)
     tarea = _enviar_circuito(circuito, servidor)
     resultados = _recibir_circuito(tarea, circuito)
     return resultados
