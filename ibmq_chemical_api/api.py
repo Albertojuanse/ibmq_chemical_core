@@ -49,16 +49,11 @@ def ejecutar_ibmq_vqe_post():
         dibujo = configuracioncore["dibujo"]
     else:
         dibujo = None
-    if ibmq_chemical_core.orquestador.get_backend():
-        backend = ibmq_chemical_core.orquestador.get_backend().configuration()["name"]
-    else:
-        backend = 'statevector_simulator'
 
     resultados, consola, distancias = ibmq_chemical_core.orquestador.ejecutar_ibmq_vqe(
         configuracionproblema=configuracionproblema,
         configuracionmolecula=configuracionmolecula,
-        dibujo=dibujo,
-        backend=backend
+        dibujo=dibujo
     )
     respuesta = _crear_json_resultados(resultados, consola, distancias)
     return Response(respuesta, status=200, mimetype='application/json', headers={'content-type': 'application/json'})

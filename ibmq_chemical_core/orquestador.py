@@ -106,9 +106,11 @@ def ejecutar_ibmq_vqe(configuracionproblema=None,
     else:
         distancias = numpy.arange(0.5, 5.5, 0.1)
         consolas = []
-        energia = numpy.zeros(1, len(distancias))
+        energia = []
         for i, distancia in enumerate(distancias):
-            energia[i], consolas[i] = lanzar_vqe(distancia)
+            resultado_energia, resultado_consolas = lanzar_vqe(distancia)
+            consolas.append(resultado_consolas)
+            energia.append(resultado_energia)
     return energia, consolas, distancias
 
 
@@ -126,5 +128,4 @@ def ejecutar_numero_aleatorio(cifras=5, servidor=None):
         if int(j) > int(mayorj):
             mayori = i
             mayorj = j
-    print(mayori, mayorj)
     return mayori
